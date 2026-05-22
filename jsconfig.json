@@ -2,6 +2,11 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "baseUrl": ".",
+    "jsx": "preserve",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "ESNext"
   }
 }
