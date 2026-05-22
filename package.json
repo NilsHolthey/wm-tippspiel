@@ -11,6 +11,9 @@
     "seed-fixtures": "node --env-file=.env.local scripts/seed-fixtures.js",
     "seed-users": "node --env-file=.env.local scripts/seed-users.js"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "mongoose": "^9.6.2",
