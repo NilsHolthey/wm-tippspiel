@@ -1,0 +1,48 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  background: var(--d3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 36px;
+}
+
+.btn {
+  background: var(--d4);
+  border: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.icon {
+  font-size: 20px;
+  font-weight: 200;
+  color: #fff;
+  pointer-events: none;
+  transition: color 0.12s;
+  line-height: 1;
+}
+
+.btn:hover { background: var(--d5); }
+.btn:hover .icon { color: var(--gold-lt); }
+.btn:active { background: rgba(201,168,76,0.2); }
+.btn:disabled { opacity: 0.2; cursor: default; }
+
+.btnL { border-right: 1px solid rgba(255,255,255,0.08); }
+.btnR { border-left: 1px solid rgba(255,255,255,0.08); }
+
+.val {
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 30px;
+  text-align: center;
+  color: var(--text);
+}

@@ -1,0 +1,76 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(201,168,76,0.07) 0%, transparent 55%), var(--dark);
+  padding: 20px;
+}
+
+.card {
+  background: var(--d2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 28px;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 0 80px rgba(201,168,76,0.08);
+  text-align: center;
+}
+
+.icon { font-size: 3rem; margin-bottom: 8px; filter: drop-shadow(0 0 16px rgba(201,168,76,0.5)); }
+
+.title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.9rem;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  margin-bottom: 3px;
+}
+
+.sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 26px; }
+
+.field { text-align: left; margin-bottom: 13px; }
+
+.label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.input {
+  width: 100%;
+  background: var(--d3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.93rem;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--gold); }
+
+.error { font-size: 0.78rem; color: var(--red); margin-bottom: 8px; }
+
+.btn {
+  width: 100%;
+  margin-top: 10px;
+  background: linear-gradient(135deg, var(--gold-dk), var(--gold));
+  border: none;
+  border-radius: 8px;
+  color: var(--dark);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 13px;
+  transition: opacity 0.2s, transform 0.1s;
+  letter-spacing: 0.04em;
+}
+.btn:hover { opacity: 0.87; transform: translateY(-1px); }
+.btn:disabled { opacity: 0.6; cursor: default; transform: none; }

@@ -1,0 +1,89 @@
+.card {
+  background: var(--d2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+
+.card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-1px); box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+
+.finished    { border-left: 2px solid rgba(34,197,94,0.45); }
+.pendingLate { border-left: 2px solid rgba(234,179,8,0.45); }
+.noTip       { border-left: 2px solid rgba(239,68,68,0.35); }
+
+.inner { padding: 12px 16px; }
+
+/* meta row */
+.meta { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+
+.pill { font-size: 0.62rem; letter-spacing: 0.07em; text-transform: uppercase; border-radius: 4px; padding: 2px 6px; background: var(--d4); }
+.pillDay  { color: var(--gold); }
+.pillGrp  { color: var(--muted); }
+
+.metaDate   { font-size: 0.74rem; color: var(--muted); }
+.metaUrgent { font-size: 0.7rem; color: var(--red); font-weight: 600; animation: pulse 1.4s infinite; }
+.metaSoon   { font-size: 0.7rem; color: var(--yellow); }
+
+/* teams row */
+.row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+
+.home { display: flex; align-items: center; gap: 7px; }
+.away { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+
+.flag { font-size: 1.25rem; }
+.teamName { font-size: 0.92rem; font-weight: 600; }
+
+.scoreWrap { text-align: center; flex-shrink: 0; }
+.score { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--gold); line-height: 1; }
+.scorePending { color: var(--muted); font-size: 1.1rem; letter-spacing: 0.12em; }
+
+/* bottom strip */
+.strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--d3);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 7px 16px;
+  gap: 8px;
+}
+
+.stripTip { display: flex; align-items: center; gap: 6px; }
+.stripLbl { font-size: 0.7rem; color: var(--muted); }
+.stripVal { font-size: 0.88rem; font-weight: 700; }
+.stripPts { font-size: 0.68rem; border-radius: 4px; padding: 2px 6px; font-weight: 500; }
+
+.pts3 { background: rgba(34,197,94,0.15);  color: var(--green); }
+.pts2 { background: rgba(201,168,76,0.15); color: var(--gold); }
+.pts1 { background: rgba(234,179,8,0.15);  color: var(--yellow); }
+.pts0 { background: rgba(239,68,68,0.1);   color: #f87171; }
+
+.noTipBadge  { font-size: 0.7rem; color: #f87171; font-style: italic; }
+.lateBadge   { font-size: 0.7rem; color: var(--yellow); display: flex; align-items: center; gap: 4px; }
+.lateMuted   { color: var(--muted); font-weight: 400; }
+
+.action {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid;
+  cursor: pointer;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s;
+}
+
+.actionTip  { color: var(--gold);   border-color: rgba(201,168,76,0.4); }
+.actionTip:hover  { background: rgba(201,168,76,0.1); }
+
+.actionEdit { color: var(--muted);  border-color: rgba(255,255,255,0.1); }
+.actionEdit:hover { background: rgba(255,255,255,0.05); }
+
+.actionLate { color: var(--yellow); border-color: rgba(234,179,8,0.35); }
+.actionLate:hover { background: rgba(234,179,8,0.08); }

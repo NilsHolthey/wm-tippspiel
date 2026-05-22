@@ -1,0 +1,136 @@
+import { useState, useEffect } from "react";
+import Stepper from "./Stepper";
+import s from "./TipModal.module.css";
+
+const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: s.pts0 };
+const PTS_LBL = { 3: "✅ Treffer", 2: "〰 Differenz", 1: "↗ Tendenz", 0: "✗ Daneben" };
+
+function pill(label, cls) {
+  return <span style={{ fontSize:"0.62rem", letterSpacing:"0.07em", textTransform:"uppercase", borderRadius:"4px", padding:"2px 6px", background:"var(--d4)", color: cls === "day" ? "var(--gold)" : "var(--muted)" }}>{label}</span>;
+}
+
+export default function TipModal({ match, myTip, onClose, onSaved }) {
+  const isLate = match.isLate;
+  const [h, setH] = useState(myTip?.h ?? 0);
+  const [a, setA] = useState(myTip?.a ?? 0);
+  const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const fn = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", fn);
+    return () => document.removeEventListener("keydown", fn);
+  }, [onClose]);
+
+  function overlayClick(e) { if (e.target === e.currentTarget) onClose(); }
+
+  async function submit() {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/tips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId: match._id, h, a }),
+      });
+      if (!res.ok) throw new Error("Fehler beim Speichern");
+      setDone(true);
+      onSaved?.({ h, a, lateStatus: isLate ? "pending" : null });
+      setTimeout(onClose, 1400);
+    } catch {
+      alert("Fehler beim Speichern. Bitte erneut versuchen.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const kickoffDate = new Date(match.kickoff);
+  const dateStr = kickoffDate.toLocaleDateString("de-DE", { weekday:"short", day:"2-digit", month:"2-digit" })
+    + "  " + kickoffDate.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
+
+  return (
+    <div className={s.overlay} onClick={overlayClick}>
+      <div className={s.modal}>
+
+        <div className={s.header}>
+          <div className={s.meta}>
+            {pill(`Spieltag ${match.matchday}`, "day")}
+            {match.group && pill(`Gruppe ${match.group}`, "grp")}
+            <span style={{ fontSize:"0.76rem", color:"var(--muted)" }}>{dateStr}</span>
+          </div>
+          <button className={s.close} onClick={onClose}>✕</button>
+        </div>
+
+        <div className={s.teams}>
+          <div className={s.teamHome}>
+            <span className={s.flag}>{match.homeFlag}</span>
+            <span className={s.teamName}>{match.home}</span>
+          </div>
+          <div className={s.resultWrap}>
+            {match.finished
+              ? <span className={s.result}>{match.result.h} : {match.result.a}</span>
+              : <span className={s.vs}>–:–</span>}
+          </div>
+          <div className={s.teamAway}>
+            <span className={s.flag}>{match.awayFlag}</span>
+            <span className={s.teamName}>{match.away}</span>
+          </div>
+        </div>
+
+        {isLate && (
+          <div className={s.lateWarning}>
+            <span>⚠️</span>
+            Deadline abgelaufen — Admin muss diesen Tipp bestätigen
+          </div>
+        )}
+
+        <div className={s.tipping}>
+          <div className={s.tippingLabel}>Dein Tipp</div>
+          <div className={s.steppersRow}>
+            <div className={s.stepperGroup}>
+              <span className={s.stepperTeamLbl}>{match.home}</span>
+              <Stepper value={h} onChange={setH} />
+            </div>
+            <span className={s.colon}>:</span>
+            <div className={s.stepperGroup}>
+              <span className={s.stepperTeamLbl}>{match.away}</span>
+              <Stepper value={a} onChange={setA} />
+            </div>
+          </div>
+
+          <button
+            className={`${s.submitBtn}${isLate ? " " + s.submitLate : ""}${done ? " " + s.submitDone : ""}`}
+            onClick={submit}
+            disabled={done || saving}
+          >
+            {done
+              ? "✓ Gespeichert!"
+              : saving
+              ? "Speichert…"
+              : isLate
+              ? "Anfrage senden"
+              : myTip
+              ? "Tipp aktualisieren"
+              : "Tipp speichern"}
+          </button>
+        </div>
+
+        {match.tipsVisible && match.others?.length > 0 && (
+          <div className={s.others}>
+            <span className={s.othersLbl}>Alle Tipps</span>
+            <div className={s.othersGrid}>
+              {match.others.map((o, i) => (
+                <div key={i} className={s.chip}>
+                  <span className={s.chipWho}>{o.name}</span>
+                  <span className={s.chipScore}>{o.h}:{o.a}</span>
+                  {match.finished && o.pts != null && (
+                    <span className={`${s.chipPts} ${PTS_CLS[o.pts]}`}>{o.pts}P</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

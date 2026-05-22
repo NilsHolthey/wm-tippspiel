@@ -1,88 +1,293 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import Link from "next/link";
+import { getSession } from "next-auth/react";
+import Nav from "../components/Nav";
+import s from "../styles/Page.module.css";
+import { calcPoints } from "../lib/scoring";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const MEDALS = ["🥇", "🥈", "🥉"];
+const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: null };
+const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" }) +
+    " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr";
+}
 
-export default function Home() {
+function UpcomingMatches({ matches, myTipsMap }) {
+  if (!matches.length) return <p className={s.empty}>Keine bevorstehenden Spiele.</p>;
+  return (
+    <div>
+      {matches.map(m => {
+        const tip = myTipsMap[m._id];
+        const label = m.group ? `Gruppe ${m.group}` : m.phase;
+        return (
+          <div key={m._id} className={s.nmRow}>
+            <div className={s.nmTeams}>
+              <div className={s.nmHome}>
+                <span className={s.nmFlag}>{m.homeFlag}</span>
+                <span className={s.nmName}>{m.home}</span>
+              </div>
+              <span className={s.nmVs}>–:–</span>
+              <div className={s.nmAway}>
+                <span className={s.nmName}>{m.away}</span>
+                <span className={s.nmFlag}>{m.awayFlag}</span>
+              </div>
+            </div>
+            <div className={s.nmMeta}>
+              <span>{formatDate(m.kickoff)}</span>
+              <span className={s.nmDot}>·</span>
+              <span>{label}</span>
+              <span className={s.nmDot}>·</span>
+              {tip
+                ? <span className={`${s.nmTip} ${s.nmTipYes}`}>Tipp: {tip.h}:{tip.a}</span>
+                : <span className={`${s.nmTip} ${s.nmTipNo}`}>Kein Tipp</span>
+              }
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RecentResults({ results, myTipsMap }) {
+  if (!results.length) {
+    return (
+      <p className={s.empty}>
+        Noch keine Ergebnisse. Das Turnier startet am 11. Juni 2026.
+      </p>
+    );
+  }
+  return (
+    <div>
+      {results.map(m => {
+        const tip = myTipsMap[m._id];
+        const pts = tip ? calcPoints({ h: tip.h, a: tip.a }, m.result) : null;
+        const label = m.group ? `Gruppe ${m.group}` : m.phase;
+        return (
+          <div key={m._id} className={s.rRow}>
+            <div className={s.rLeft}>
+              <span className={s.rFlag}>{m.homeFlag}</span>
+              <span className={s.rTeam}>{m.home}</span>
+              <span className={s.rScore}>{m.result.h}:{m.result.a}</span>
+              <span className={s.rTeam}>{m.away}</span>
+              <span className={s.rFlag}>{m.awayFlag}</span>
+            </div>
+            <div className={s.rRight}>
+              {tip ? (
+                <>
+                  <div className={s.rTipLbl}>{tip.h}:{tip.a}</div>
+                  <span className={`${s.rPts} ${PTS_CLS[pts] ?? ""}`}>
+                    {PTS_LBL[pts]} · {pts} Pkt
+                  </span>
+                </>
+              ) : (
+                <span className={s.rTipLbl} style={{ fontStyle: "italic" }}>Kein Tipp</span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MiniLeaderboard({ board, currentUserId }) {
+  const top5 = board.slice(0, 5);
+  const myIdx = board.findIndex(p => p.id === currentUserId);
+  const myEntry = board[myIdx];
+  const showMe = myIdx >= 5 && myEntry;
+
+  return (
+    <div className={s.miniBoard}>
+      {top5.map((p, i) => (
+        <div key={p.id} className={`${s.mbRow}${p.id === currentUserId ? " " + s.mbRowMe : ""}`}>
+          <span className={s.mbRank}>{i < 3 ? MEDALS[i] : i + 1}</span>
+          <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
+          <span className={s.mbPts}>{p.pts}</span>
+        </div>
+      ))}
+      {showMe && (
+        <>
+          <div className={s.mbSep}>· · ·</div>
+          <div className={`${s.mbRow} ${s.mbRowMe}`}>
+            <span className={s.mbRank}>{myIdx + 1}</span>
+            <span className={s.mbName}>{myEntry.name} (Du)</span>
+            <span className={s.mbPts}>{myEntry.pts}</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Rules() {
+  return (
+    <div className={s.homeSec}>
+      <div className={s.homeSecTitle}>📋 Spielregeln</div>
+
+      <div className={s.rulesGrid}>
+        <div className={s.ruleCard}>
+          <div className={s.ruleCardTop}>
+            <span className={`${s.legendChip} ${s.pts3}`}>3 Punkte</span>
+          </div>
+          <div className={s.ruleCardBody}>Richtiges Ergebnis – genaue Tore für beide Teams.</div>
+        </div>
+        <div className={s.ruleCard}>
+          <div className={s.ruleCardTop}>
+            <span className={`${s.legendChip} ${s.pts2}`}>2 Punkte</span>
+          </div>
+          <div className={s.ruleCardBody}>Richtige Tordifferenz – nur bei Sieg oder Niederlage (nicht bei Unentschieden).</div>
+        </div>
+        <div className={s.ruleCard}>
+          <div className={s.ruleCardTop}>
+            <span className={`${s.legendChip} ${s.pts1}`}>1 Punkt</span>
+          </div>
+          <div className={s.ruleCardBody}>Richtige Tendenz – Sieg, Unentschieden oder Niederlage korrekt vorhergesagt.</div>
+        </div>
+      </div>
+
+      <hr className={s.ruleDivider} />
+
+      <div className={s.ruleExtra}>
+        <div className={s.ruleExtraRow}>
+          <span className={s.ruleExtraIcon}>⏰</span>
+          <span>Tipps müssen <strong>60 Minuten vor Anpfiff</strong> abgegeben werden. Danach ist kein Tipp mehr möglich.</span>
+        </div>
+        <div className={s.ruleExtraRow}>
+          <span className={s.ruleExtraIcon}>👁</span>
+          <span>Die Tipps der anderen Spieler sind erst nach dem Ablauf der Deadline sichtbar.</span>
+        </div>
+        <div className={s.ruleExtraRow}>
+          <span className={s.ruleExtraIcon}>⚠️</span>
+          <span>Verspätete Tipps können per Anfrage eingereicht werden – ein Admin muss sie genehmigen.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId }) {
   return (
     <>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div
-        className={`${styles.page} ${geistSans.variable} ${geistMono.variable}`}
-      >
-        <main className={styles.main}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js logo"
-            width={100}
-            height={20}
-            priority
-          />
-          <div className={styles.intro}>
-            <h1>To get started, edit the index.js file.</h1>
-            <p>
-              Looking for a starting point or more instructions? Head over to{" "}
-              <a
-                href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Templates
-              </a>{" "}
-              or the{" "}
-              <a
-                href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Learning
-              </a>{" "}
-              center.
-            </p>
+      <Head><title>WM Tippspiel 2026</title></Head>
+      <div className={s.app}>
+        <Nav />
+        <div className={s.wrap}>
+
+          <div className={s.homeHero}>
+            <div className={s.homeTitle}>WM <span>TIPPSPIEL</span> 2026</div>
+            <div className={s.homeSub}>11. Juni – 19. Juli 2026 · USA, Kanada &amp; Mexiko</div>
           </div>
-          <div className={styles.ctas}>
-            <a
-              className={styles.primary}
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                className={styles.logo}
-                src="/vercel.svg"
-                alt="Vercel logomark"
-                width={16}
-                height={16}
-              />
-              Deploy Now
-            </a>
-            <a
-              className={styles.secondary}
-              href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Documentation
-            </a>
+
+          <div className={s.homeGrid}>
+            {/* left: upcoming */}
+            <div className={s.homeSec}>
+              <div className={s.homeSecTitle}>
+                ⏳ Nächste Spiele
+                <Link href="/tipps" style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)", textDecoration: "none" }}>
+                  Alle →
+                </Link>
+              </div>
+              <UpcomingMatches matches={nextMatches} myTipsMap={myTipsMap} />
+            </div>
+
+            {/* right: leaderboard */}
+            <div className={s.homeSec}>
+              <div className={s.homeSecTitle}>
+                🏆 Rangliste
+                <Link href="/rangliste" style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)", textDecoration: "none" }}>
+                  Alle →
+                </Link>
+              </div>
+              <MiniLeaderboard board={board} currentUserId={currentUserId} />
+            </div>
           </div>
-        </main>
+
+          {/* recent results full width */}
+          <div className={s.homeSec}>
+            <div className={s.homeSecTitle}>⚽ Letzte Ergebnisse</div>
+            <RecentResults results={recentResults} myTipsMap={myTipsMap} />
+          </div>
+
+          <Rules />
+
+        </div>
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+  if (!session) return { redirect: { destination: "/login", permanent: false } };
+
+  const { connectDB } = await import("../lib/db");
+  const { default: User }  = await import("../models/User");
+  const { default: Match } = await import("../models/Match");
+  const { default: Tip }   = await import("../models/Tip");
+
+  await connectDB();
+  const userId = session.user.id;
+
+  const [rawNext, rawRecent, users, allFinished, allTips] = await Promise.all([
+    Match.find({ finished: false }).sort({ kickoff: 1 }).limit(4).lean(),
+    Match.find({ finished: true  }).sort({ kickoff: -1 }).limit(5).lean(),
+    User.find().lean(),
+    Match.find({ finished: true }).lean(),
+    Tip.find({ lateStatus: { $in: [null, "approved"] } }).lean(),
+  ]);
+
+  // tips map for the current user (next + recent matches)
+  const relevantIds = new Set([...rawNext, ...rawRecent].map(m => m._id.toString()));
+  const myTipsMap = {};
+  const tipMap = {};
+  for (const t of allTips) {
+    tipMap[`${t.user}-${t.match}`] = t;
+    if (t.user.toString() === userId && relevantIds.has(t.match.toString())) {
+      myTipsMap[t.match.toString()] = { h: t.h, a: t.a };
+    }
+  }
+
+  // leaderboard
+  const board = users.map(u => {
+    let pts = 0, correct = 0, diff = 0, tendency = 0, tipped = 0;
+    for (const m of allFinished) {
+      const tip = tipMap[`${u._id}-${m._id}`];
+      if (!tip) continue;
+      tipped++;
+      const p = calcPoints({ h: tip.h, a: tip.a }, m.result);
+      pts += p;
+      if (p === 3) correct++;
+      else if (p === 2) diff++;
+      else if (p === 1) tendency++;
+    }
+    return { id: u._id.toString(), name: u.username, pts, correct, diff, tendency, tipped };
+  }).sort((a, b) => b.pts - a.pts || b.correct - a.correct || b.diff - a.diff);
+
+  function serializeMatch(m) {
+    return {
+      _id: m._id.toString(),
+      matchday: m.matchday,
+      group: m.group ?? null,
+      phase: m.phase || "Gruppenphase",
+      home: m.home, homeFlag: m.homeFlag ?? "",
+      away: m.away, awayFlag: m.awayFlag ?? "",
+      kickoff: m.kickoff.toISOString(),
+      finished: m.finished,
+      result: m.result ?? null,
+    };
+  }
+
+  return {
+    props: {
+      nextMatches:    rawNext.map(serializeMatch),
+      recentResults:  rawRecent.map(serializeMatch),
+      board,
+      myTipsMap,
+      currentUserId: userId,
+    },
+  };
 }
