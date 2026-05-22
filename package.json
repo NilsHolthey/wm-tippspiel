@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node --experimental-vm-modules scripts/seed.js",
-    "seed-fixtures": "node scripts/seed-fixtures.js",
-    "seed-users": "node scripts/seed-users.js"
+    "seed-fixtures": "node --env-file=.env.local scripts/seed-fixtures.js",
+    "seed-users": "node --env-file=.env.local scripts/seed-users.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
