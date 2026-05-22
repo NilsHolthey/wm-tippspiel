@@ -87,3 +87,50 @@
 
 .actionLate { color: var(--yellow); border-color: rgba(234,179,8,0.35); }
 .actionLate:hover { background: rgba(234,179,8,0.08); }
+
+/* other tips row */
+.othersRow {
+  background: var(--d3);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 6px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.othersLbl {
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+.otherChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--d4);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 5px;
+  padding: 2px 7px 2px 5px;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.otherName {
+  color: var(--muted);
+  font-size: 0.63rem;
+}
+
+.otherScore { font-weight: 700; }
+
+.otherPts {
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}

@@ -171,6 +171,7 @@ export async function getServerSideProps(context) {
   const otherTipsMap = {};
 
   for (const tip of tips) {
+    if (!tip.user) continue;
     const mId = tip.match.toString();
     if (tip.user._id.toString() === userId) {
       myTipsMap[mId] = { h: tip.h, a: tip.a, lateStatus: tip.lateStatus };

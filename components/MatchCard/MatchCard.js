@@ -42,7 +42,10 @@ export default function MatchCard({ match, myTip: initialTip, otherTips = [] }) 
   const hasTip      = !!myTip && myTip.lateStatus !== "pending";
   const latePending = myTip?.lateStatus === "pending";
   const noTip       = !myTip && !urgent;
-  const tipsVisible = locked || match.finished;
+  // For finished matches tips are always visible (game over, no tactical advantage).
+  // For locked-but-not-yet-finished: require a confirmed tip to prevent
+  // submitting a late tip after seeing what everyone else picked.
+  const tipsVisible = match.finished || (locked && hasTip);
 
   const points = match.finished && hasTip
     ? calcPoints({ h: myTip.h, a: myTip.a }, match.result)
@@ -129,6 +132,21 @@ export default function MatchCard({ match, myTip: initialTip, otherTips = [] }) 
             </button>
           )}
         </div>
+
+        {tipsVisible && othersWithPts.length > 0 && (
+          <div className={s.othersRow}>
+            <span className={s.othersLbl}>Alle:</span>
+            {othersWithPts.map((o, i) => (
+              <div key={i} className={s.otherChip}>
+                <span className={s.otherName}>{o.name}</span>
+                <span className={s.otherScore}>{o.h}:{o.a}</span>
+                {match.finished && o.pts != null && (
+                  <span className={`${s.otherPts} ${PTS_CLS[o.pts]}`}>{o.pts}P</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {modalOpen && (

@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import Stepper from "./Stepper";
 import s from "./TipModal.module.css";
 
-const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: s.pts0 };
-const PTS_LBL = { 3: "✅ Treffer", 2: "〰 Differenz", 1: "↗ Tendenz", 0: "✗ Daneben" };
 
 function pill(label, cls) {
   return <span style={{ fontSize:"0.62rem", letterSpacing:"0.07em", textTransform:"uppercase", borderRadius:"4px", padding:"2px 6px", background:"var(--d4)", color: cls === "day" ? "var(--gold)" : "var(--muted)" }}>{label}</span>;
@@ -114,22 +112,6 @@ export default function TipModal({ match, myTip, onClose, onSaved }) {
           </button>
         </div>
 
-        {match.tipsVisible && match.others?.length > 0 && (
-          <div className={s.others}>
-            <span className={s.othersLbl}>Alle Tipps</span>
-            <div className={s.othersGrid}>
-              {match.others.map((o, i) => (
-                <div key={i} className={s.chip}>
-                  <span className={s.chipWho}>{o.name}</span>
-                  <span className={s.chipScore}>{o.h}:{o.a}</span>
-                  {match.finished && o.pts != null && (
-                    <span className={`${s.chipPts} ${PTS_CLS[o.pts]}`}>{o.pts}P</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
