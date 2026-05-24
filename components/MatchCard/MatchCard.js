@@ -1,5 +1,3 @@
-import { useState } from "react";
-import TipModal from "./TipModal";
 import s from "./MatchCard.module.css";
 import { calcPoints } from "../../lib/scoring";
 
@@ -33,18 +31,12 @@ function countdownStr(kickoff) {
   return `noch ${m}min`;
 }
 
-export default function MatchCard({ match, myTip: initialTip, otherTips = [] }) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [myTip, setMyTip] = useState(initialTip ?? null);
-
+export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
   const locked      = isLocked(match.kickoff);
   const urgent      = isUrgent(match.kickoff);
   const hasTip      = !!myTip && myTip.lateStatus !== "pending";
   const latePending = myTip?.lateStatus === "pending";
   const noTip       = !myTip && !urgent;
-  // For finished matches tips are always visible (game over, no tactical advantage).
-  // For locked-but-not-yet-finished: require a confirmed tip to prevent
-  // submitting a late tip after seeing what everyone else picked.
   const tipsVisible = match.finished || (locked && hasTip);
 
   const points = match.finished && hasTip
@@ -53,110 +45,93 @@ export default function MatchCard({ match, myTip: initialTip, otherTips = [] }) 
 
   const countdown = !locked && !match.finished ? countdownStr(match.kickoff) : null;
 
-  let cardClass = s.card;
-  if (match.finished)  cardClass += " " + s.finished;
-  if (latePending)     cardClass += " " + s.pendingLate;
-  if (noTip && !match.finished) cardClass += " " + s.noTip;
-
   const othersWithPts = otherTips.map((o) => ({
     ...o,
     pts: match.finished ? calcPoints({ h: o.h, a: o.a }, match.result) : null,
   }));
 
-  const enrichedMatch = { ...match, isLate: locked && !match.finished, tipsVisible, others: othersWithPts };
-
-  function handleSaved(newTip) {
-    setMyTip(newTip);
-  }
+  let cardClass = s.card;
+  if (match.finished)  cardClass += " " + s.finished;
+  if (latePending)     cardClass += " " + s.pendingLate;
+  if (noTip && !match.finished) cardClass += " " + s.noTip;
 
   return (
-    <>
-      <div className={cardClass} onClick={() => setModalOpen(true)}>
-        <div className={s.inner}>
-          <div className={s.meta}>
-            {match.phase === "Gruppenphase"
-              ? match.group && <span className={`${s.pill} ${s.pillGrp}`}>Gruppe {match.group}</span>
-              : <span className={`${s.pill} ${s.pillDay}`}>{match.phase}</span>
-            }
-            <span className={s.metaDate}>{formatKickoff(match.kickoff)}</span>
-            {urgent && <span className={s.metaUrgent} suppressHydrationWarning>⏱ Deadline in {countdownStr(match.kickoff)}</span>}
-            {countdown && !urgent && <span className={s.metaSoon} suppressHydrationWarning>⏱ {countdown}</span>}
-          </div>
-
-          <div className={s.row}>
-            <div className={s.home}>
-              <span className={s.flag}>{match.homeFlag}</span>
-              <span className={s.teamName}>{match.home}</span>
-            </div>
-            <div className={s.scoreWrap}>
-              {match.finished
-                ? <span className={s.score}>{match.result.h}:{match.result.a}</span>
-                : <span className={`${s.score} ${s.scorePending}`}>–:–</span>}
-            </div>
-            <div className={s.away}>
-              <span className={s.teamName}>{match.away}</span>
-              <span className={s.flag}>{match.awayFlag}</span>
-            </div>
-          </div>
+    <div className={cardClass} onClick={onOpen}>
+      <div className={s.inner}>
+        <div className={s.meta}>
+          {match.phase === "Gruppenphase"
+            ? match.group && <span className={`${s.pill} ${s.pillGrp}`}>Gruppe {match.group}</span>
+            : <span className={`${s.pill} ${s.pillDay}`}>{match.phase}</span>
+          }
+          <span className={s.metaDate}>{formatKickoff(match.kickoff)}</span>
+          {urgent && <span className={s.metaUrgent} suppressHydrationWarning>⏱ Deadline in {countdownStr(match.kickoff)}</span>}
+          {countdown && !urgent && <span className={s.metaSoon} suppressHydrationWarning>⏱ {countdown}</span>}
         </div>
 
-        <div className={s.strip}>
-          <div className={s.stripTip}>
-            <span className={s.stripLbl}>Dein Tipp:</span>
-            {hasTip && (
-              <>
-                <span className={s.stripVal}>{myTip.h} : {myTip.a}</span>
-                {match.finished && points != null && (
-                  <span className={`${s.stripPts} ${PTS_CLS[points]}`}>
-                    {PTS_LBL[points]} · {points} Pkt
-                  </span>
-                )}
-              </>
-            )}
-            {latePending && (
-              <span className={s.lateBadge}>
-                ⏳ {myTip.h}:{myTip.a}
-                <span className={s.lateMuted}>– wartet auf Admin</span>
-              </span>
-            )}
-            {noTip && !match.finished && <span className={s.noTipBadge}>Noch kein Tipp</span>}
-            {noTip && match.finished  && <span className={s.noTipBadge}>Kein Tipp abgegeben</span>}
+        <div className={s.row}>
+          <div className={s.home}>
+            <span className={s.flag}>{match.homeFlag}</span>
+            <span className={s.teamName}>{match.home}</span>
           </div>
+          <div className={s.scoreWrap}>
+            {match.finished
+              ? <span className={s.score}>{match.result.h}:{match.result.a}</span>
+              : <span className={`${s.score} ${s.scorePending}`}>–:–</span>}
+          </div>
+          <div className={s.away}>
+            <span className={s.teamName}>{match.away}</span>
+            <span className={s.flag}>{match.awayFlag}</span>
+          </div>
+        </div>
+      </div>
 
-          {!match.finished && !latePending && (
-            <button
-              className={`${s.action} ${locked ? s.actionLate : hasTip ? s.actionEdit : s.actionTip}`}
-              onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
-            >
-              {locked ? "⚠ Verspätet tippen" : hasTip ? "Ändern" : "Jetzt tippen →"}
-            </button>
+      <div className={s.strip}>
+        <div className={s.stripTip}>
+          <span className={s.stripLbl}>Dein Tipp:</span>
+          {hasTip && (
+            <>
+              <span className={s.stripVal}>{myTip.h} : {myTip.a}</span>
+              {match.finished && points != null && (
+                <span className={`${s.stripPts} ${PTS_CLS[points]}`}>
+                  {PTS_LBL[points]} · {points} Pkt
+                </span>
+              )}
+            </>
           )}
+          {latePending && (
+            <span className={s.lateBadge}>
+              ⏳ {myTip.h}:{myTip.a}
+              <span className={s.lateMuted}>– wartet auf Admin</span>
+            </span>
+          )}
+          {noTip && !match.finished && <span className={s.noTipBadge}>Noch kein Tipp</span>}
+          {noTip && match.finished  && <span className={s.noTipBadge}>Kein Tipp abgegeben</span>}
         </div>
 
-        {tipsVisible && othersWithPts.length > 0 && (
-          <div className={s.othersRow}>
-            <span className={s.othersLbl}>Alle:</span>
-            {othersWithPts.map((o, i) => (
-              <div key={i} className={s.otherChip}>
-                <span className={s.otherName}>{o.name}</span>
-                <span className={s.otherScore}>{o.h}:{o.a}</span>
-                {match.finished && o.pts != null && (
-                  <span className={`${s.otherPts} ${PTS_CLS[o.pts]}`}>{o.pts}P</span>
-                )}
-              </div>
-            ))}
-          </div>
+        {!match.finished && !latePending && (
+          <button
+            className={`${s.action} ${locked ? s.actionLate : hasTip ? s.actionEdit : s.actionTip}`}
+            onClick={(e) => { e.stopPropagation(); onOpen(); }}
+          >
+            {locked ? "⚠ Verspätet tippen" : hasTip ? "Ändern" : "Jetzt tippen →"}
+          </button>
         )}
       </div>
 
-      {modalOpen && (
-        <TipModal
-          match={enrichedMatch}
-          myTip={myTip}
-          onClose={() => setModalOpen(false)}
-          onSaved={handleSaved}
-        />
+      {tipsVisible && othersWithPts.length > 0 && (
+        <div className={s.othersRow}>
+          <span className={s.othersLbl}>Alle:</span>
+          {othersWithPts.map((o, i) => (
+            <div key={i} className={s.otherChip}>
+              <span className={s.otherName}>{o.name}</span>
+              <span className={s.otherScore}>{o.h}:{o.a}</span>
+              {match.finished && o.pts != null && (
+                <span className={`${s.otherPts} ${PTS_CLS[o.pts]}`}>{o.pts}P</span>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-    </>
+    </div>
   );
 }

@@ -27,14 +27,18 @@ function AdminResultRow({ match }) {
       <span className={s.arowMatch}>
         {match.homeFlag} {match.home} vs {match.away} {match.awayFlag}
       </span>
-      <div className={s.arowEntry}>
-        <MiniStepper value={rH} onChange={setRH} />
-        <span className={s.arowColon}>:</span>
-        <MiniStepper value={rA} onChange={setRA} />
-        <button className={s.arowSave} onClick={save} disabled={saving}>
-          {done ? "Update" : saving ? "…" : "Speichern"}
-        </button>
-        {done && <span className={s.arowDoneLabel}>✅ {rH}:{rA}</span>}
+      <div className={s.arowControls}>
+        <div className={s.arowEntry}>
+          <MiniStepper value={rH} onChange={setRH} />
+          <span className={s.arowColon}>:</span>
+          <MiniStepper value={rA} onChange={setRA} />
+        </div>
+        {done
+          ? <div className={s.arowDoneLabel}>✅ {rH}:{rA} gespeichert</div>
+          : <button className={s.arowSave} onClick={save} disabled={saving}>
+              {saving ? "Speichert…" : "Speichern"}
+            </button>
+        }
       </div>
     </div>
   );

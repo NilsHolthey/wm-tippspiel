@@ -8,6 +8,34 @@ import { calcPoints } from "../lib/scoring";
 const MEDALS = ["🥇", "🥈", "🥉"];
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: null };
 const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
+const ALL_GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+
+function calcStandings(matches) {
+  const groups = {};
+  for (const m of matches) {
+    if (!m.group) continue;
+    if (!groups[m.group]) groups[m.group] = {};
+    if (!groups[m.group][m.home]) groups[m.group][m.home] = { team: m.home, flag: m.homeFlag, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0 };
+    if (!groups[m.group][m.away]) groups[m.group][m.away] = { team: m.away, flag: m.awayFlag, played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, pts: 0 };
+    if (!m.finished || !m.result) continue;
+    const { h, a } = m.result;
+    const home = groups[m.group][m.home];
+    const away = groups[m.group][m.away];
+    home.played++; away.played++;
+    home.gf += h; home.ga += a;
+    away.gf += a; away.ga += h;
+    if (h > a)      { home.won++; away.lost++; home.pts += 3; }
+    else if (h < a) { away.won++; home.lost++; away.pts += 3; }
+    else            { home.drawn++; away.drawn++; home.pts++; away.pts++; }
+  }
+  const result = {};
+  for (const [grp, teams] of Object.entries(groups)) {
+    result[grp] = Object.values(teams).sort((a, b) =>
+      b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf || a.team.localeCompare(b.team)
+    );
+  }
+  return result;
+}
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -123,6 +151,34 @@ function MiniLeaderboard({ board, currentUserId }) {
   );
 }
 
+function GroupsPreview({ standings }) {
+  return (
+    <div className={s.homeSec}>
+      <div className={s.homeSecTitle}>
+        📊 Gruppen
+        <Link href="/gruppen" style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)", textDecoration: "none" }}>
+          Alle →
+        </Link>
+      </div>
+      <div className={s.miniGrpGrid}>
+        {ALL_GROUPS.filter(g => standings[g]).map(g => (
+          <Link key={g} href="/gruppen" className={s.miniGrpCard}>
+            <div className={s.miniGrpTitle}>Gruppe {g}</div>
+            {standings[g].map((team, i) => (
+              <div key={team.team} className={`${s.miniGrpRow}${i < 2 ? " " + s.miniGrpQual : ""}`}>
+                <span className={s.miniGrpPos}>{i + 1}</span>
+                <span className={s.miniGrpFlag}>{team.flag}</span>
+                <span className={s.miniGrpName}>{team.team}</span>
+                <span className={s.miniGrpPts}>{team.pts}</span>
+              </div>
+            ))}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Rules() {
   return (
     <div className={s.homeSec}>
@@ -169,7 +225,7 @@ function Rules() {
   );
 }
 
-export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId }) {
+export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId, groupStandings }) {
   return (
     <>
       <Head><title>WM Tippspiel 2026</title></Head>
@@ -212,6 +268,8 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
             <RecentResults results={recentResults} myTipsMap={myTipsMap} />
           </div>
 
+          <GroupsPreview standings={groupStandings} />
+
           <Rules />
 
         </div>
@@ -232,12 +290,13 @@ export async function getServerSideProps(context) {
   await connectDB();
   const userId = session.user.id;
 
-  const [rawNext, rawRecent, users, allFinished, allTips] = await Promise.all([
+  const [rawNext, rawRecent, users, allFinished, allTips, rawGroupMatches] = await Promise.all([
     Match.find({ finished: false }).sort({ kickoff: 1 }).limit(4).lean(),
     Match.find({ finished: true  }).sort({ kickoff: -1 }).limit(5).lean(),
     User.find().lean(),
     Match.find({ finished: true }).lean(),
     Tip.find({ lateStatus: { $in: [null, "approved"] } }).lean(),
+    Match.find({ group: { $ne: null } }).sort({ kickoff: 1 }).lean(),
   ]);
 
   // tips map for the current user (next + recent matches)
@@ -281,6 +340,12 @@ export async function getServerSideProps(context) {
     };
   }
 
+  const groupStandings = calcStandings(rawGroupMatches.map(m => ({
+    ...m,
+    _id: m._id.toString(),
+    kickoff: m.kickoff.toISOString(),
+  })));
+
   return {
     props: {
       nextMatches:    rawNext.map(serializeMatch),
@@ -288,6 +353,7 @@ export async function getServerSideProps(context) {
       board,
       myTipsMap,
       currentUserId: userId,
+      groupStandings,
     },
   };
 }
