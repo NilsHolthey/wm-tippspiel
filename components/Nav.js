@@ -6,6 +6,7 @@ import s from "./Nav.module.css";
 const LINKS = [
   { href: "/",          label: "Home" },
   { href: "/tipps",     label: "Tipps" },
+  { href: "/gruppen",   label: "Gruppen" },
   { href: "/rangliste", label: "Rangliste" },
 ];
 

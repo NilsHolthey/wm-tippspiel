@@ -219,6 +219,8 @@
 }
 .arowSave:hover { background: var(--d5); }
 .arowDoneLabel { color: var(--green); font-size: 0.78rem; }
+.arowControls { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.arowControls .arowSave { width: 100%; }
 
 .empty { color: var(--muted); font-size: 0.83rem; font-style: italic; }
 
@@ -394,3 +396,170 @@
   line-height: 1.4;
 }
 .ruleExtraIcon { flex-shrink: 0; font-size: 0.9rem; margin-top: 1px; }
+
+/* ── home: mini group preview ────────────────────────────── */
+.miniGrpGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+.miniGrpCard {
+  display: block;
+  text-decoration: none;
+  background: var(--d3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.12s;
+  cursor: pointer;
+}
+.miniGrpCard:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-1px); }
+
+.miniGrpTitle {
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  padding: 6px 8px 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.miniGrpRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+}
+.miniGrpRow:last-child { border-bottom: none; }
+.miniGrpQual { border-left: 2px solid rgba(201,168,76,0.35); }
+
+.miniGrpPos  { font-size: 0.62rem; color: var(--muted); width: 10px; flex-shrink: 0; }
+.miniGrpFlag { font-size: 0.82rem; flex-shrink: 0; }
+.miniGrpName { font-size: 0.72rem; font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.miniGrpPts  { font-size: 0.72rem; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+
+/* ── gruppen page ─────────────────────────────────────────── */
+.grpGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.grpCard {
+  background: var(--d2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.grpCardTitle {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+/* standings table */
+.grpTable { padding: 4px 0; }
+
+.grpRow {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, 32px);
+  align-items: center;
+  padding: 5px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+  font-size: 0.78rem;
+}
+.grpRow:last-child { border-bottom: none; }
+
+.grpHead {
+  font-size: 0.58rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.grpQual { border-left: 2px solid rgba(201,168,76,0.4); }
+
+.grpTeamCol {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.grpRank  { width: 14px; font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
+.grpFlag  { font-size: 1rem; flex-shrink: 0; }
+.grpTeam  { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.grpNum   { text-align: center; font-size: 0.78rem; color: var(--muted); }
+.grpPts   { color: var(--gold); font-weight: 700; }
+
+/* match list */
+.grpMatches {
+  border-top: 1px solid var(--border);
+  padding: 4px 0;
+}
+
+.grpMatch {
+  padding: 6px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+}
+.grpMatch:last-child { border-bottom: none; }
+.grpMatchDone { opacity: 0.75; }
+
+.grpMatchDate {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.grpMatchTeams {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+}
+.grpMatchFlag { font-size: 0.9rem; }
+.grpMatchName { font-weight: 500; flex: 1; }
+.grpMatchName:last-of-type { text-align: right; }
+.grpMatchScore {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: center;
+}
+.grpMatchVs {
+  font-size: 0.68rem;
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .grpGrid { grid-template-columns: 1fr; }
+  .grpRow  { grid-template-columns: 1fr repeat(7, 26px); padding: 5px 8px; font-size: 0.72rem; }
+}
+
+/* ── admin mobile ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .lrrow { flex-direction: column; align-items: stretch; }
+  .lrBtns { display: flex; gap: 8px; }
+  .btnOk, .btnNo { flex: 1; text-align: center; padding: 9px 8px; }
+
+  .arow { flex-direction: column; align-items: stretch; gap: 8px; }
+  .arowEntry { flex-wrap: wrap; }
+  .arowMatch { font-size: 0.82rem; }
+}

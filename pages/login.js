@@ -20,7 +20,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError("Benutzername oder Passwort falsch.");
     } else {
-      router.push("/tipps");
+      router.push("/");
     }
   }
 
@@ -70,6 +70,6 @@ export default function LoginPage() {
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-  if (session) return { redirect: { destination: "/tipps", permanent: false } };
+  if (session) return { redirect: { destination: "/", permanent: false } };
   return { props: {} };
 }
