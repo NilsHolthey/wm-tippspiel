@@ -17,28 +17,6 @@ export default function Nav() {
 
   useEffect(() => { setOpen(false); }, [router.pathname]);
 
-  useEffect(() => {
-    if (open) {
-      const scrollY = window.scrollY;
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-    } else {
-      const top = document.body.style.top;
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      if (top) window.scrollTo(0, parseInt(top) * -1);
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-    };
-  }, [open]);
 
   const initials = session?.user?.name
     ?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?";
