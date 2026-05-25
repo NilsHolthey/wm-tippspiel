@@ -37,7 +37,7 @@ export default function Document() {
         <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1179-2556.png" />
         {/* iPhone 14 Pro Max / 15 Plus / 15 Pro Max: 1290×2796 */}
         <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1290-2796.png" />
-        {/* iPhone 16 Pro: 1206×2622 */}
+        {/* iPhone 16 Pro / iPhone 17: 1206×2622 */}
         <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1206-2622.png" />
         {/* iPhone 16 Pro Max / 17 Pro Max: 1320×2868 */}
         <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1320-2868.png" />
