@@ -13,11 +13,13 @@ export default function Document() {
         <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#C9A84C" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Tippspiel" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-        {/* iOS splash screens */}
+        <link rel="apple-touch-icon" href="/icons/icon-512.png" />
+        {/* iOS splash screens — generic fallback first, then per-device overrides */}
+        <link rel="apple-touch-startup-image" href="/icons/splash.png" />
         <link rel="apple-touch-startup-image" media="screen and (device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2) and (orientation:portrait)" href="/icons/splash/splash-640x1136.png" />
         <link rel="apple-touch-startup-image" media="screen and (device-width:375px) and (device-height:667px) and (-webkit-device-pixel-ratio:2) and (orientation:portrait)" href="/icons/splash/splash-750x1334.png" />
         <link rel="apple-touch-startup-image" media="screen and (device-width:414px) and (device-height:736px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="/icons/splash/splash-1242x2208.png" />
