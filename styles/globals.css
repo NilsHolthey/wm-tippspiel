@@ -50,6 +50,10 @@ a {
   text-decoration: none;
 }
 
+input, textarea, select {
+  font-size: 16px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
