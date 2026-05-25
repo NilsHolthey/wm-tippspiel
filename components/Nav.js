@@ -17,6 +17,29 @@ export default function Nav() {
 
   useEffect(() => { setOpen(false); }, [router.pathname]);
 
+  useEffect(() => {
+    if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+    } else {
+      const top = document.body.style.top;
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      if (top) window.scrollTo(0, parseInt(top) * -1);
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+    };
+  }, [open]);
+
   const initials = session?.user?.name
     ?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?";
 
@@ -57,24 +80,27 @@ export default function Nav() {
       </nav>
 
       {open && (
-        <div className={s.drawer}>
-          <div className={s.drawerUser}>
-            <div className={s.avatar}>{initials}</div>
-            <span className={s.drawerName}>{session?.user?.name}</span>
-          </div>
-          {links.map(({ href, label }) => (
-            <button
-              key={href}
-              className={`${s.drawerLink}${router.pathname === href ? " " + s.drawerActive : ""}`}
-              onClick={() => router.push(href)}
-            >
-              {label}
+        <>
+          <div className={s.overlay} onClick={() => setOpen(false)} />
+          <div className={s.drawer}>
+            <div className={s.drawerUser}>
+              <div className={s.avatar}>{initials}</div>
+              <span className={s.drawerName}>{session?.user?.name}</span>
+            </div>
+            {links.map(({ href, label }) => (
+              <button
+                key={href}
+                className={`${s.drawerLink}${router.pathname === href ? " " + s.drawerActive : ""}`}
+                onClick={() => { setOpen(false); router.push(href); }}
+              >
+                {label}
+              </button>
+            ))}
+            <button className={s.drawerLogout} onClick={() => signOut({ callbackUrl: "/login" })}>
+              Abmelden
             </button>
-          ))}
-          <button className={s.drawerLogout} onClick={() => signOut({ callbackUrl: "/login" })}>
-            Abmelden
-          </button>
-        </div>
+          </div>
+        </>
       )}
     </>
   );

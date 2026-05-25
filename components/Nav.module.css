@@ -87,9 +87,18 @@
 .blBot  { transform: translateY(-7px) rotate(-45deg); }
 
 /* ── mobile drawer ───────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 198;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  animation: fadeOverlay 0.15s ease;
+}
+
 .drawer {
   position: fixed;
-  top: 56px;
+  top: calc(56px + env(safe-area-inset-top, 0px));
   left: 0;
   right: 0;
   z-index: 199;
