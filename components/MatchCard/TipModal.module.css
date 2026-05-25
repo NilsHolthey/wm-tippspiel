@@ -37,6 +37,9 @@
     flex-direction: column;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  .header {
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  }
 }
 
 /* ── header ──────────────────────────────────────────────── */
