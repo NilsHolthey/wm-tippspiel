@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/nilsholthey/Workspace/NHolthey/wm-tippspiel/pages/tipps)"
+    ],
+    "additionalDirectories": [
+      "/Users/nilsholthey/Workspace/NHolthey/wm-tippspiel/pages"
+    ]
+  }
+}
