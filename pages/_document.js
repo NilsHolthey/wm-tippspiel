@@ -19,6 +19,32 @@ export default function Document() {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Tippspiel" />
         <link rel="apple-touch-icon" href="/icons/icon-512.png" />
+
+        {/* iOS splash screens — generated via pwa-asset-generator */}
+        {/* iPhone SE (2nd/3rd gen) / 8: 750×1334 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/apple-splash-750-1334.png" />
+        {/* iPhone X / XS / 11 Pro / 12 mini / 13 mini: 1125×2436 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1125-2436.png" />
+        {/* iPhone XR / 11: 828×1792 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/apple-splash-828-1792.png" />
+        {/* iPhone XS Max / 11 Pro Max: 1242×2688 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1242-2688.png" />
+        {/* iPhone 12 / 13 / 14: 1170×2532 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1170-2532.png" />
+        {/* iPhone 12 Pro Max / 13 Pro Max / 14 Plus: 1284×2778 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1284-2778.png" />
+        {/* iPhone 14 Pro: 1179×2556 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1179-2556.png" />
+        {/* iPhone 14 Pro Max / 15 Plus / 15 Pro Max: 1290×2796 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1290-2796.png" />
+        {/* iPhone 16 Pro / iPhone 17: 1206×2622 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1206-2622.png" />
+        {/* iPhone 16 Pro Max / 17 Pro Max: 1320×2868 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/apple-splash-1320-2868.png" />
+        {/* iPad Air 11-inch (M1/M2): 1640×2360 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/apple-splash-1640-2360.png" />
+        {/* iPad Air 13-inch (M2): 2048×2732 */}
+        <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/apple-splash-2048-2732.png" />
       </Head>
       <body>
         <Main />
