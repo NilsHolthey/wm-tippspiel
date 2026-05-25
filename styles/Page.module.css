@@ -2,6 +2,7 @@
   min-height: 100vh;
   background: var(--dark);
   position: relative;
+  padding-top: calc(56px + env(safe-area-inset-top, 0px));
 }
 
 .app::before {
