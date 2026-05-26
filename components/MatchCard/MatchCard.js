@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import s from "./MatchCard.module.css";
 import { calcPoints } from "../../lib/scoring";
 
@@ -31,7 +32,7 @@ function countdownStr(kickoff) {
   return `noch ${m}min`;
 }
 
-export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
+export default function MatchCard({ match, myTip, otherTips = [], onOpen, index = 0 }) {
   const locked      = isLocked(match.kickoff);
   const urgent      = isUrgent(match.kickoff);
   const hasTip      = !!myTip && myTip.lateStatus !== "pending";
@@ -56,7 +57,13 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
   if (noTip && !match.finished) cardClass += " " + s.noTip;
 
   return (
-    <div className={cardClass} onClick={onOpen}>
+    <motion.div
+      className={cardClass}
+      onClick={onOpen}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: "easeOut", delay: index * 0.045 }}
+    >
       <div className={s.inner}>
         <div className={s.meta}>
           {match.phase === "Gruppenphase"
@@ -132,6 +139,6 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

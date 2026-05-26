@@ -1,5 +1,8 @@
 import Head from "next/head";
-import { getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { motion } from "framer-motion";
 import { shortName } from "../lib/teamNames";
 import Nav from "../components/Nav";
 import s from "../styles/Page.module.css";
@@ -99,6 +102,13 @@ function MatchList({ matches }) {
 }
 
 export default function GruppenPage({ groups, standings }) {
+  const { status } = useSession();
+  const router = useRouter();
+  useEffect(() => {
+    if (status === "unauthenticated") router.replace("/login");
+  }, [status, router]);
+  if (status === "loading" || status === "unauthenticated") return null;
+
   return (
     <>
       <Head><title>Gruppen – WM Tippspiel</title></Head>
@@ -110,12 +120,18 @@ export default function GruppenPage({ groups, standings }) {
           </div>
 
           <div className={s.grpGrid}>
-            {GROUPS.filter(g => groups[g]).map(g => (
-              <div key={g} className={s.grpCard}>
+            {GROUPS.filter(g => groups[g]).map((g, i) => (
+              <motion.div
+                key={g}
+                className={s.grpCard}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, ease: "easeOut", delay: i * 0.05 }}
+              >
                 <div className={s.grpCardTitle}>Gruppe {g}</div>
                 <StandingsTable rows={standings[g] ?? []} />
                 <MatchList matches={groups[g]} />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -124,34 +140,35 @@ export default function GruppenPage({ groups, standings }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) return { redirect: { destination: "/login", permanent: false } };
+export async function getStaticProps() {
+  try {
+    const { connectDB } = await import("../lib/db");
+    const { default: Match } = await import("../models/Match");
 
-  const { connectDB } = await import("../lib/db");
-  const { default: Match } = await import("../models/Match");
+    await connectDB();
 
-  await connectDB();
+    const rawMatches = await Match.find({ group: { $ne: null } }).sort({ kickoff: 1 }).lean();
 
-  const rawMatches = await Match.find({ group: { $ne: null } }).sort({ kickoff: 1 }).lean();
+    const groups = {};
+    for (const m of rawMatches) {
+      if (!groups[m.group]) groups[m.group] = [];
+      groups[m.group].push({
+        _id: m._id.toString(),
+        home: shortName(m.home), homeFlag: m.homeFlag ?? "",
+        away: shortName(m.away), awayFlag: m.awayFlag ?? "",
+        kickoff: m.kickoff.toISOString(),
+        finished: m.finished,
+        result: m.result ?? null,
+        group: m.group,
+      });
+    }
 
-  const groups = {};
-  for (const m of rawMatches) {
-    if (!groups[m.group]) groups[m.group] = [];
-    groups[m.group].push({
-      _id: m._id.toString(),
-      home: shortName(m.home), homeFlag: m.homeFlag ?? "",
-      away: shortName(m.away), awayFlag: m.awayFlag ?? "",
-      kickoff: m.kickoff.toISOString(),
-      finished: m.finished,
-      result: m.result ?? null,
-      group: m.group,
-    });
+    const standings = calcStandings(
+      rawMatches.map(m => ({ ...m, _id: m._id.toString(), kickoff: m.kickoff.toISOString() }))
+    );
+
+    return { props: { groups, standings }, revalidate: 60 };
+  } catch (e) {
+    return { props: { groups: {}, standings: {} }, revalidate: 30 };
   }
-
-  const standings = calcStandings(
-    rawMatches.map(m => ({ ...m, _id: m._id.toString(), kickoff: m.kickoff.toISOString() }))
-  );
-
-  return { props: { groups, standings } };
 }

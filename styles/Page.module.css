@@ -1,3 +1,8 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .app {
   min-height: 100dvh;
   width: 100%;
@@ -120,8 +125,8 @@
 .mdSep { width: 1px; flex-shrink: 0; background: var(--border); margin: 4px 6px; }
 
 /* section label */
-.slbl { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.mlist { display: flex; flex-direction: column; gap: 6px; margin-bottom: 26px; }
+.slbl { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; margin-top: 6px; }
+.mlist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
 
 /* leaderboard */
 .tableWrap { background: var(--d2); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }

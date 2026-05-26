@@ -7,7 +7,7 @@ export default function Stepper({ value, onChange }) {
         <span className={s.icon}>+</span>
       </button>
       <div className={s.number}>
-        <span className={`${s.val}${value === 0 ? " " + s.zero : ""}`}>{value}</span>
+        <span className={s.val}>{value}</span>
       </div>
       <button
         className={`${s.btn} ${s.bot}`}
