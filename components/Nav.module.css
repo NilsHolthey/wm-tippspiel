@@ -26,6 +26,14 @@
   flex-shrink: 0;
   text-decoration: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logoImg {
+  border-radius: 7px;
+  flex-shrink: 0;
 }
 
 .logo span { color: var(--text); }
