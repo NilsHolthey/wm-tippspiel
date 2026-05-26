@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import s from "./Nav.module.css";
 
 const LINKS = [
@@ -28,7 +29,7 @@ export default function Nav() {
   return (
     <>
       <nav className={s.nav}>
-        <div className={s.logo}>🏆 <span>WM</span> TIPP</div>
+        <Link href="/" className={s.logo}>🏆 <span>WM</span> TIPP</Link>
 
         <div className={s.links}>
           {links.map(({ href, label }) => (
