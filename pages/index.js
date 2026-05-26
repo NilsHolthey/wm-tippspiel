@@ -11,7 +11,6 @@ import { calcPoints } from "../lib/scoring";
 const MEDALS = ["🥇", "🥈", "🥉"];
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: null };
 const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
-const ALL_GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
 function calcStandings(matches) {
   const groups = {};
@@ -154,7 +153,7 @@ function MiniLeaderboard({ board, currentUserId }) {
   );
 }
 
-function GroupsPreview({ standings }) {
+function GroupsPreview({ standings, activeGroups }) {
   return (
     <div className={s.homeSec}>
       <div className={s.homeSecTitle}>
@@ -164,7 +163,7 @@ function GroupsPreview({ standings }) {
         </Link>
       </div>
       <div className={s.miniGrpGrid}>
-        {ALL_GROUPS.filter(g => standings[g]).map(g => (
+        {activeGroups.filter(g => standings[g]).map(g => (
           <Link key={g} href="/gruppen" className={s.miniGrpCard}>
             <div className={s.miniGrpTitle}>Gruppe {g}</div>
             {standings[g].map((team, i) => (
@@ -228,7 +227,7 @@ function Rules() {
   );
 }
 
-export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId, groupStandings }) {
+export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId, groupStandings, activeGroups }) {
   const router = useRouter();
   return (
     <>
@@ -286,7 +285,7 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: "easeOut", delay: 0.2 }}
           >
-            <GroupsPreview standings={groupStandings} />
+            <GroupsPreview standings={groupStandings} activeGroups={activeGroups} />
           </motion.div>
 
           <motion.div
@@ -370,6 +369,23 @@ export async function getServerSideProps(context) {
     kickoff: m.kickoff.toISOString(),
   })));
 
+  // groups with matches yesterday, today or tomorrow
+  const now = new Date();
+  const dayStart = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+  const yesterday = dayStart(new Date(now - 86400000));
+  const tomorrow  = dayStart(new Date(now.getTime() + 86400000));
+  tomorrow.setHours(23,59,59,999);
+  const activeGroupSet = new Set(
+    rawGroupMatches
+      .filter(m => { const k = new Date(m.kickoff); return k >= yesterday && k <= tomorrow; })
+      .map(m => m.group)
+  );
+  // fallback: first 6 groups that have standings data
+  const allStandingGroups = ["A","B","C","D","E","F","G","H","I","J","K","L"].filter(g => groupStandings[g]);
+  const activeGroups = activeGroupSet.size > 0
+    ? allStandingGroups.filter(g => activeGroupSet.has(g))
+    : allStandingGroups.slice(0, 6);
+
   return {
     props: {
       nextMatches:    rawNext.map(serializeMatch),
@@ -378,6 +394,7 @@ export async function getServerSideProps(context) {
       myTipsMap,
       currentUserId: userId,
       groupStandings,
+      activeGroups,
     },
   };
 }

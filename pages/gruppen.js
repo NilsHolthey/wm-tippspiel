@@ -1,13 +1,16 @@
 import Head from "next/head";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
+import useSWR from "swr";
 import { shortName } from "../lib/teamNames";
 import Nav from "../components/Nav";
+import MatchSheet from "../components/MatchSheet";
 import s from "../styles/Page.module.css";
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+const fetcher = (url) => fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json(); });
 
 function calcStandings(matches) {
   const groups = {};
@@ -75,28 +78,41 @@ function StandingsTable({ rows }) {
   );
 }
 
-function MatchList({ matches }) {
+function MatchList({ matches, onOpen, myTipsMap }) {
   if (!matches.length) return null;
   return (
     <div className={s.grpMatches}>
-      {matches.map(m => (
-        <div key={m._id} className={`${s.grpMatch}${m.finished ? " " + s.grpMatchDone : ""}`}>
-          <span className={s.grpMatchDate}>{formatDate(m.kickoff)}</span>
-          <div className={s.grpMatchTeams}>
-            <div className={s.grpMatchHome}>
-              <span className={s.grpMatchFlag}>{m.homeFlag}</span>
-              <span className={s.grpMatchName}>{m.home}</span>
+      {matches.map(m => {
+        const tip = myTipsMap?.[m._id];
+        const hasTip = tip && tip.lateStatus !== "pending";
+        return (
+          <div
+            key={m._id}
+            className={`${s.grpMatch}${m.finished ? " " + s.grpMatchDone : ""}`}
+            onClick={() => onOpen(m._id)}
+          >
+            <div className={s.grpMatchMeta}>
+              <span className={s.grpMatchDate}>{formatDate(m.kickoff)}</span>
+              {hasTip && (
+                <span className={s.grpMatchTip}>{tip.h}:{tip.a}</span>
+              )}
             </div>
-            {m.finished
-              ? <span className={s.grpMatchScore}>{m.result.h} : {m.result.a}</span>
-              : <span className={s.grpMatchVs}>–:–</span>}
-            <div className={s.grpMatchAway}>
-              <span className={s.grpMatchName}>{m.away}</span>
-              <span className={s.grpMatchFlag}>{m.awayFlag}</span>
+            <div className={s.grpMatchTeams}>
+              <div className={s.grpMatchHome}>
+                <span className={s.grpMatchFlag}>{m.homeFlag}</span>
+                <span className={s.grpMatchName}>{m.home}</span>
+              </div>
+              {m.finished
+                ? <span className={s.grpMatchScore}>{m.result.h} : {m.result.a}</span>
+                : <span className={s.grpMatchVs}>–:–</span>}
+              <div className={s.grpMatchAway}>
+                <span className={s.grpMatchName}>{m.away}</span>
+                <span className={s.grpMatchFlag}>{m.awayFlag}</span>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -107,7 +123,39 @@ export default function GruppenPage({ groups, standings }) {
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login");
   }, [status, router]);
+
+  const { data: tipsData, mutate } = useSWR(
+    status === "authenticated" ? "/api/tipps/data" : null,
+    fetcher,
+    { revalidateOnFocus: true, dedupingInterval: 30000 }
+  );
+  const tipsMatches = tipsData?.matches ?? [];
+  const myTipsMap = tipsData?.myTipsMap ?? {};
+  const otherTipsMap = tipsData?.otherTipsMap ?? {};
+
+  const [sheetId, setSheetId] = useState(null);
+
   if (status === "loading" || status === "unauthenticated") return null;
+  const sheetMatch = sheetId ? tipsMatches.find(m => m._id === sheetId) : null;
+
+  const allMatchdays = [...new Set(tipsMatches.map(m => m.matchday))].sort((a, b) => a - b);
+  const dayMatches = sheetMatch
+    ? tipsMatches.filter(m => m.matchday === sheetMatch.matchday).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))
+    : [];
+  const sheetIdx = dayMatches.findIndex(m => m._id === sheetId);
+  const prevId = sheetIdx > 0 ? dayMatches[sheetIdx - 1]._id : null;
+  const nextId = sheetIdx < dayMatches.length - 1 ? dayMatches[sheetIdx + 1]._id : null;
+  const sheetDayIdx = sheetMatch ? allMatchdays.indexOf(sheetMatch.matchday) : -1;
+  const prevDayId = sheetDayIdx > 0
+    ? tipsMatches.filter(m => m.matchday === allMatchdays[sheetDayIdx - 1]).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0]?._id ?? null
+    : null;
+  const nextDayId = sheetDayIdx >= 0 && sheetDayIdx < allMatchdays.length - 1
+    ? tipsMatches.filter(m => m.matchday === allMatchdays[sheetDayIdx + 1]).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0]?._id ?? null
+    : null;
+
+  function handleTipSaved(matchId, tip) {
+    mutate(prev => prev ? { ...prev, myTipsMap: { ...prev.myTipsMap, [matchId]: tip } } : prev, false);
+  }
 
   return (
     <>
@@ -130,12 +178,27 @@ export default function GruppenPage({ groups, standings }) {
               >
                 <div className={s.grpCardTitle}>Gruppe {g}</div>
                 <StandingsTable rows={standings[g] ?? []} />
-                <MatchList matches={groups[g]} />
+                <MatchList matches={groups[g]} onOpen={setSheetId} myTipsMap={myTipsMap} />
               </motion.div>
             ))}
           </div>
         </div>
       </div>
+
+      {sheetMatch && (
+        <MatchSheet
+          match={sheetMatch}
+          myTip={myTipsMap[sheetId] ?? null}
+          otherTips={otherTipsMap[sheetId] ?? []}
+          prevId={prevId}
+          nextId={nextId}
+          prevDayId={prevDayId}
+          nextDayId={nextDayId}
+          onClose={() => setSheetId(null)}
+          onNavigate={setSheetId}
+          onTipSaved={handleTipSaved}
+        />
+      )}
     </>
   );
 }

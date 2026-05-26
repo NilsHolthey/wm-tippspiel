@@ -1,19 +1,19 @@
 .nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  left: 12px;
+  right: 12px;
   z-index: 200;
-  height: calc(60px + env(safe-area-inset-bottom, 0px));
-  background: rgba(6, 10, 27, 0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(201, 168, 76, 0.18);
+  height: 60px;
+  background: rgba(8, 11, 28, 0.90);
+  backdrop-filter: blur(48px);
+  -webkit-backdrop-filter: blur(48px);
+  will-change: backdrop-filter;
+  border: 1px solid rgba(201, 168, 76, 0.14);
+  box-shadow: 0 -2px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  border-radius: 22px;
   display: flex;
-  align-items: flex-start;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+  align-items: center;
 }
 
 .item {
@@ -24,19 +24,19 @@
   justify-content: center;
   gap: 3px;
   height: 60px;
-  color: var(--muted);
+  color: rgba(232, 228, 217, 0.55);
   text-decoration: none;
   transition: color 0.2s ease;
   cursor: pointer;
   min-height: 44px;
 }
 
-.item:hover { color: var(--text); }
+.item:hover { color: rgba(232, 228, 217, 0.85); }
 .active { color: var(--gold) !important; }
 
 .label {
   font-size: 0.58rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   font-family: 'DM Sans', sans-serif;

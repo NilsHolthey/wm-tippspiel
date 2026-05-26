@@ -63,7 +63,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
   return (
     <div className={s.sheet}>
       <div className={s.header}>
-        <button className={s.back} onClick={onClose}>← Tipps</button>
+        <button className={s.back} onClick={onClose}>← Zurück</button>
       </div>
 
       <div className={s.content}>
