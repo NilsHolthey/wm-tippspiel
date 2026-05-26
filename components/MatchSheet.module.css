@@ -110,8 +110,8 @@
 .mpTipping { background: var(--d2); border: 1px solid var(--border); border-radius: 16px; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 16px; }
 .mpTipLabel { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; text-align: center; }
 .mpSteppers { display: flex; align-items: center; justify-content: center; gap: 16px; }
-.mpStepGroup { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.mpStepLbl { font-size: 0.72rem; color: var(--muted); }
+.mpStepGroup { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 80px; }
+.mpStepLbl { font-size: 0.72rem; color: var(--muted); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mpColon { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: var(--muted); align-self: center; }
 
 .mpSubmit { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--gold-dk), var(--gold)); border: none; border-radius: 10px; color: var(--dark); font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; }
