@@ -11,7 +11,7 @@
   overflow-y: auto;
   overflow-x: clip;
   animation: slideUp 0.2s ease forwards;
-  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .header {
