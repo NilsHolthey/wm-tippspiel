@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
+import { shortName } from "../lib/teamNames";
 import Nav from "../components/Nav";
 import MatchCard from "../components/MatchCard/MatchCard";
 import s from "../styles/Page.module.css";
@@ -193,10 +194,10 @@ export async function getServerSideProps(context) {
     matchday: m.matchday,
     group: m.group ?? null,
     phase: m.phase || "Gruppenphase",
-    home: m.home,
+    home: shortName(m.home),
     homeFlag: m.homeFlag ?? "",
     homeForm: form5(m.home),
-    away: m.away,
+    away: shortName(m.away),
     awayFlag: m.awayFlag ?? "",
     awayForm: form5(m.away),
     kickoff: m.kickoff.toISOString(),

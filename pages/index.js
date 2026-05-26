@@ -1,5 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
+import { shortName } from "../lib/teamNames";
+import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 import Nav from "../components/Nav";
 import s from "../styles/Page.module.css";
@@ -226,6 +228,7 @@ function Rules() {
 }
 
 export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId, groupStandings }) {
+  const router = useRouter();
   return (
     <>
       <Head><title>WM Tippspiel 2026</title></Head>
@@ -240,23 +243,19 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
 
           <div className={s.homeGrid}>
             {/* left: upcoming */}
-            <div className={s.homeSec}>
+            <div className={`${s.homeSec} ${s.homeSecLink}`} onClick={() => router.push("/tipps")} role="link" tabIndex={0}>
               <div className={s.homeSecTitle}>
                 ⏳ Nächste Spiele
-                <Link href="/tipps" style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)", textDecoration: "none" }}>
-                  Alle →
-                </Link>
+                <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
               <UpcomingMatches matches={nextMatches} myTipsMap={myTipsMap} />
             </div>
 
             {/* right: leaderboard */}
-            <div className={s.homeSec}>
+            <div className={`${s.homeSec} ${s.homeSecLink}`} onClick={() => router.push("/rangliste")} role="link" tabIndex={0}>
               <div className={s.homeSecTitle}>
                 🏆 Rangliste
-                <Link href="/rangliste" style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)", textDecoration: "none" }}>
-                  Alle →
-                </Link>
+                <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
               <MiniLeaderboard board={board} currentUserId={currentUserId} />
             </div>
@@ -332,8 +331,8 @@ export async function getServerSideProps(context) {
       matchday: m.matchday,
       group: m.group ?? null,
       phase: m.phase || "Gruppenphase",
-      home: m.home, homeFlag: m.homeFlag ?? "",
-      away: m.away, awayFlag: m.awayFlag ?? "",
+      home: shortName(m.home), homeFlag: m.homeFlag ?? "",
+      away: shortName(m.away), awayFlag: m.awayFlag ?? "",
       kickoff: m.kickoff.toISOString(),
       finished: m.finished,
       result: m.result ?? null,

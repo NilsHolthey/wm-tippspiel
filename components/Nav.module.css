@@ -20,6 +20,8 @@
   color: var(--gold);
   margin-right: 28px;
   flex-shrink: 0;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .logo span { color: var(--text); }

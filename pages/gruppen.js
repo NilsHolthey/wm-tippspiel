@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { getSession } from "next-auth/react";
+import { shortName } from "../lib/teamNames";
 import Nav from "../components/Nav";
 import s from "../styles/Page.module.css";
 
@@ -79,13 +80,17 @@ function MatchList({ matches }) {
         <div key={m._id} className={`${s.grpMatch}${m.finished ? " " + s.grpMatchDone : ""}`}>
           <span className={s.grpMatchDate}>{formatDate(m.kickoff)}</span>
           <div className={s.grpMatchTeams}>
-            <span className={s.grpMatchFlag}>{m.homeFlag}</span>
-            <span className={s.grpMatchName}>{m.home}</span>
+            <div className={s.grpMatchHome}>
+              <span className={s.grpMatchFlag}>{m.homeFlag}</span>
+              <span className={s.grpMatchName}>{m.home}</span>
+            </div>
             {m.finished
               ? <span className={s.grpMatchScore}>{m.result.h} : {m.result.a}</span>
               : <span className={s.grpMatchVs}>–:–</span>}
-            <span className={s.grpMatchName}>{m.away}</span>
-            <span className={s.grpMatchFlag}>{m.awayFlag}</span>
+            <div className={s.grpMatchAway}>
+              <span className={s.grpMatchName}>{m.away}</span>
+              <span className={s.grpMatchFlag}>{m.awayFlag}</span>
+            </div>
           </div>
         </div>
       ))}
@@ -135,8 +140,8 @@ export async function getServerSideProps(context) {
     if (!groups[m.group]) groups[m.group] = [];
     groups[m.group].push({
       _id: m._id.toString(),
-      home: m.home, homeFlag: m.homeFlag ?? "",
-      away: m.away, awayFlag: m.awayFlag ?? "",
+      home: shortName(m.home), homeFlag: m.homeFlag ?? "",
+      away: shortName(m.away), awayFlag: m.awayFlag ?? "",
       kickoff: m.kickoff.toISOString(),
       finished: m.finished,
       result: m.result ?? null,

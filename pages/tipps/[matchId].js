@@ -6,6 +6,7 @@ import Nav from "../../components/Nav";
 import Stepper from "../../components/MatchCard/Stepper";
 import s from "../../styles/Page.module.css";
 import { calcPoints } from "../../lib/scoring";
+import { shortName } from "../../lib/teamNames";
 
 const LOCK_MIN = 60;
 function isDeadlinePast(kickoff) {
@@ -58,7 +59,7 @@ export default function MatchTipPage({ match, myTipInit, otherTips, prevId, next
         <div className={s.wrap}>
 
           <div className={s.mpNav}>
-            <button className={s.mpBack} onClick={() => router.push("/tipps")}>← Tipps</button>
+            <button className={s.mpBack} onClick={() => router.back()}>← Zurück</button>
             <div className={s.mpNavArrows}>
               <button className={s.mpArrow} onClick={() => router.push(`/tipps/${prevId}`)} disabled={!prevId}>←</button>
               <button className={s.mpArrow} onClick={() => router.push(`/tipps/${nextId}`)} disabled={!nextId}>→</button>
@@ -184,11 +185,9 @@ export async function getServerSideProps(context) {
     teamForm[m.away].push(a > h ? "S" : a < h ? "N" : "U");
   }
 
-  // prev / next within same matchday
-  const dayMatches = allMatches.filter(m => m.matchday === rawMatch.matchday);
-  const idx = dayMatches.findIndex(m => m._id.toString() === matchId);
-  const prevId = idx > 0 ? dayMatches[idx - 1]._id.toString() : null;
-  const nextId = idx < dayMatches.length - 1 ? dayMatches[idx + 1]._id.toString() : null;
+  const idx = allMatches.findIndex(m => m._id.toString() === matchId);
+  const prevId = idx > 0 ? allMatches[idx - 1]._id.toString() : null;
+  const nextId = idx < allMatches.length - 1 ? allMatches[idx + 1]._id.toString() : null;
 
   const tips = await Tip.find({ match: matchId }).populate("user", "username").lean();
 
@@ -209,10 +208,10 @@ export async function getServerSideProps(context) {
     _id: rawMatch._id.toString(),
     matchday: rawMatch.matchday,
     group: rawMatch.group ?? null,
-    home: rawMatch.home,
+    home: shortName(rawMatch.home),
     homeFlag: rawMatch.homeFlag ?? "",
     homeForm: (teamForm[rawMatch.home] ?? []).slice(-5),
-    away: rawMatch.away,
+    away: shortName(rawMatch.away),
     awayFlag: rawMatch.awayFlag ?? "",
     awayForm: (teamForm[rawMatch.away] ?? []).slice(-5),
     kickoff: rawMatch.kickoff.toISOString(),
