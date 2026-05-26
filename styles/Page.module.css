@@ -8,7 +8,7 @@
   width: 100%;
   background: radial-gradient(ellipse at 50% 0%, #151829 0%, var(--dark) 65%);
   position: relative;
-  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  padding-top: calc(70px + env(safe-area-inset-top, 0px));
 }
 
 .app::before {
@@ -26,7 +26,7 @@
 .wrap {
   max-width: 960px;
   margin: 0 auto;
-  padding: 28px calc(16px + env(safe-area-inset-right, 0px)) calc(92px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
+  padding: 28px calc(16px + env(safe-area-inset-right, 0px)) calc(106px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
   position: relative;
   z-index: 1;
   animation: fadeIn 0.25s ease forwards;
@@ -130,7 +130,15 @@
 .mlist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
 
 /* leaderboard */
-.tableWrap { background: var(--d2); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
+.tableWrap {
+  background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
+  border-radius: 20px;
+  overflow-x: auto;
+}
 
 .table { border-collapse: collapse; width: 100%; }
 
@@ -258,9 +266,12 @@
 }
 
 .homeSec {
-  background: var(--d2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
+  border-radius: 20px;
   padding: 16px 18px;
   margin-bottom: 16px;
 }
@@ -460,9 +471,12 @@
 }
 
 .grpCard {
-  background: var(--d2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -522,12 +536,18 @@
 .grpMatch {
   padding: 6px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.025);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.12s;
 }
+.grpMatch:active { background: rgba(255,255,255,0.04); }
 .grpMatch:last-child { border-bottom: none; }
 .grpMatchDone { opacity: 0.75; }
 
+.grpMatchMeta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.grpMatchTip { font-size: 0.62rem; font-weight: 700; color: var(--gold); background: rgba(201,168,76,0.1); border-radius: 4px; padding: 1px 5px; }
+
 .grpMatchDate {
-  display: block;
   font-size: 0.62rem;
   color: var(--muted);
   margin-bottom: 3px;
