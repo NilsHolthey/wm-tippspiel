@@ -4,17 +4,29 @@
   left: 12px;
   right: 12px;
   z-index: 200;
-  background: rgba(11, 14, 28, 0.88);
-  backdrop-filter: blur(48px);
-  -webkit-backdrop-filter: blur(48px);
-  will-change: backdrop-filter;
+  background: rgba(11, 14, 28, 0.95);
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
   border-radius: 18px;
+  transform: translateZ(0);
   min-height: 50px;
   display: flex;
   align-items: center;
   padding: 0 calc(16px + env(safe-area-inset-right, 0px)) 0 calc(16px + env(safe-area-inset-left, 0px));
+  overflow: hidden;
+}
+
+.nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset -10px -8px 0px -11px rgba(255, 255, 255, 0.8),
+    inset 0px -9px 0px -8px rgba(255, 255, 255, 0.8);
+  z-index: 1;
 }
 
 .logo {
@@ -118,10 +130,7 @@
   left: 12px;
   right: 12px;
   z-index: 199;
-  background: rgba(11, 14, 28, 0.92);
-  backdrop-filter: blur(48px);
-  -webkit-backdrop-filter: blur(48px);
-  will-change: backdrop-filter;
+  background: rgba(11, 14, 28, 0.97);
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
   border-radius: 16px;
@@ -171,6 +180,19 @@
   text-align: left;
   width: 100%;
   margin-top: 6px;
+}
+
+@supports (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px)) {
+  .nav {
+    background: rgba(11, 14, 28, 0.72);
+    -webkit-backdrop-filter: blur(2px) saturate(180%);
+    backdrop-filter: blur(2px) saturate(180%);
+  }
+  .drawer {
+    background: rgba(11, 14, 28, 0.82);
+    -webkit-backdrop-filter: blur(2px) saturate(180%);
+    backdrop-filter: blur(2px) saturate(180%);
+  }
 }
 
 /* ── responsive ──────────────────────────────────────────────── */

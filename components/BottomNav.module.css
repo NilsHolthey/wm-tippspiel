@@ -5,15 +5,27 @@
   right: 12px;
   z-index: 200;
   height: 60px;
-  background: rgba(8, 11, 28, 0.90);
-  backdrop-filter: blur(48px);
-  -webkit-backdrop-filter: blur(48px);
-  will-change: backdrop-filter;
+  background: rgba(8, 11, 28, 0.96);
   border: 1px solid rgba(201, 168, 76, 0.14);
+  transform: translateZ(0);
   box-shadow: 0 -2px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
   border-radius: 22px;
   display: flex;
   align-items: center;
+  overflow: hidden;
+}
+
+.nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset -10px -8px 0px -11px rgba(255, 255, 255, 0.8),
+    inset 0px -9px 0px -8px rgba(255, 255, 255, 0.8);
+  z-index: 1;
 }
 
 .item {
@@ -40,6 +52,14 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   font-family: 'DM Sans', sans-serif;
+}
+
+@supports (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px)) {
+  .nav {
+    background: rgba(8, 11, 28, 0.78);
+    -webkit-backdrop-filter: blur(2px) saturate(180%);
+    backdrop-filter: blur(2px) saturate(180%);
+  }
 }
 
 @media (min-width: 641px) {
