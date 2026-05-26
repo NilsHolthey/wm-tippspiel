@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import Head from "next/head";
 import Link from "next/link";
 import { shortName } from "../lib/teamNames";
@@ -243,33 +244,57 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
 
           <div className={s.homeGrid}>
             {/* left: upcoming */}
-            <div className={`${s.homeSec} ${s.homeSecLink}`} onClick={() => router.push("/tipps")} role="link" tabIndex={0}>
+            <motion.div
+              className={`${s.homeSec} ${s.homeSecLink}`}
+              onClick={() => router.push("/tipps")} role="link" tabIndex={0}
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: "easeOut", delay: 0.05 }}
+            >
               <div className={s.homeSecTitle}>
                 ⏳ Nächste Spiele
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
               <UpcomingMatches matches={nextMatches} myTipsMap={myTipsMap} />
-            </div>
+            </motion.div>
 
             {/* right: leaderboard */}
-            <div className={`${s.homeSec} ${s.homeSecLink}`} onClick={() => router.push("/rangliste")} role="link" tabIndex={0}>
+            <motion.div
+              className={`${s.homeSec} ${s.homeSecLink}`}
+              onClick={() => router.push("/rangliste")} role="link" tabIndex={0}
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: "easeOut", delay: 0.1 }}
+            >
               <div className={s.homeSecTitle}>
                 🏆 Rangliste
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
               <MiniLeaderboard board={board} currentUserId={currentUserId} />
-            </div>
+            </motion.div>
           </div>
 
           {/* recent results full width */}
-          <div className={s.homeSec}>
+          <motion.div
+            className={s.homeSec}
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: "easeOut", delay: 0.15 }}
+          >
             <div className={s.homeSecTitle}>⚽ Letzte Ergebnisse</div>
             <RecentResults results={recentResults} myTipsMap={myTipsMap} />
-          </div>
+          </motion.div>
 
-          <GroupsPreview standings={groupStandings} />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: "easeOut", delay: 0.2 }}
+          >
+            <GroupsPreview standings={groupStandings} />
+          </motion.div>
 
-          <Rules />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: "easeOut", delay: 0.25 }}
+          >
+            <Rules />
+          </motion.div>
 
         </div>
       </div>
