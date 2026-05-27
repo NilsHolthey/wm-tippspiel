@@ -32,7 +32,6 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-
   const initials = session?.user?.name
     ?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?";
 

@@ -826,3 +826,19 @@
     padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 64px 20px 40px;
+  text-align: center;
+}
+
+.emptyIcon { font-size: 2.8rem; }
+
+.emptyTitle {
+  font-size: 0.9rem;
+  color: var(--muted);
+}

@@ -52,8 +52,9 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen, index 
   }));
 
   let cardClass = s.card;
-  if (match.finished)  cardClass += " " + s.finished;
-  if (latePending)     cardClass += " " + s.pendingLate;
+  if (match.finished)           cardClass += " " + s.finished;
+  if (points === 3)             cardClass += " " + s.cardFlash3;
+  if (latePending)              cardClass += " " + s.pendingLate;
   if (noTip && !match.finished) cardClass += " " + s.noTip;
 
   return (

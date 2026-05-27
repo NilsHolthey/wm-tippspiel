@@ -1,3 +1,16 @@
+@keyframes pts3Flash {
+  0%   { box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07); }
+  28%  { box-shadow: 0 0 0 2px rgba(34,197,94,0.55), 0 8px 28px rgba(34,197,94,0.22), inset 0 1px 0 rgba(255,255,255,0.07); }
+  100% { box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07); }
+}
+
+@keyframes badgePop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.22); }
+  65%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
 .card {
   background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
   border: 1px solid rgba(255,255,255,0.07);
@@ -6,6 +19,10 @@
   overflow: hidden;
   cursor: pointer;
   position: relative;
+}
+
+.cardFlash3 {
+  animation: pts3Flash 0.75s ease-out;
 }
 
 .card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-1px); box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
@@ -56,7 +73,7 @@
 .stripVal { font-size: 0.88rem; font-weight: 700; }
 .stripPts { font-size: 0.68rem; border-radius: 4px; padding: 2px 6px; font-weight: 500; }
 
-.pts3 { background: rgba(34,197,94,0.15);  color: var(--green); }
+.pts3 { background: rgba(34,197,94,0.15);  color: var(--green); animation: badgePop 0.45s ease-out; }
 .pts2 { background: rgba(201,168,76,0.15); color: var(--gold); }
 .pts1 { background: rgba(234,179,8,0.15);  color: var(--yellow); }
 .pts0 { background: rgba(239,68,68,0.1);   color: #f87171; }
