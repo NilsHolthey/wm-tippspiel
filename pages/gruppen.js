@@ -2,7 +2,7 @@ import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import useSWR from "swr";
 import { shortName } from "../lib/teamNames";
 import { calcStandings } from "../lib/standings";
@@ -160,20 +160,23 @@ export default function GruppenPage({ groups, standings }) {
         </div>
       </div>
 
-      {sheetMatch && (
-        <MatchSheet
-          match={sheetMatch}
-          myTip={myTipsMap[sheetId] ?? null}
-          otherTips={otherTipsMap[sheetId] ?? []}
-          prevId={prevId}
-          nextId={nextId}
-          prevDayId={prevDayId}
-          nextDayId={nextDayId}
-          onClose={() => setSheetId(null)}
-          onNavigate={setSheetId}
-          onTipSaved={handleTipSaved}
-        />
-      )}
+      <AnimatePresence>
+        {sheetMatch && (
+          <MatchSheet
+            match={sheetMatch}
+            myTip={myTipsMap[sheetId] ?? null}
+            otherTips={otherTipsMap[sheetId] ?? []}
+            groupMatches={sheetMatch?.group ? tipsMatches.filter(m => m.group === sheetMatch.group) : []}
+            prevId={prevId}
+            nextId={nextId}
+            prevDayId={prevDayId}
+            nextDayId={nextDayId}
+            onClose={() => setSheetId(null)}
+            onNavigate={setSheetId}
+            onTipSaved={handleTipSaved}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
