@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { motion, useDragControls } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
+import { motion, useDragControls, AnimatePresence } from "framer-motion";
 import Stepper from "./MatchCard/Stepper";
 import { calcPoints } from "../lib/scoring";
+import { calcStandings } from "../lib/standings";
 import s from "./MatchSheet.module.css";
 
 const LOCK_MIN = 60;
@@ -10,13 +11,23 @@ function isDeadlinePast(kickoff) {
 }
 const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
 
-export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], prevId, nextId, prevDayId, nextDayId, onClose, onNavigate, onTipSaved }) {
+const TableIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+    <rect x="1" y="1" width="14" height="14" rx="2"/>
+    <line x1="1" y1="5.5" x2="15" y2="5.5"/>
+    <line x1="1" y1="10.5" x2="15" y2="10.5"/>
+    <line x1="5.5" y1="1" x2="5.5" y2="15"/>
+  </svg>
+);
+
+export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], groupMatches = [], prevId, nextId, prevDayId, nextDayId, onClose, onNavigate, onTipSaved }) {
   const dragControls = useDragControls();
   const [h, setH] = useState(myTipProp?.h ?? 0);
   const [a, setA] = useState(myTipProp?.a ?? 0);
   const [myTip, setMyTip] = useState(myTipProp);
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showTable, setShowTable] = useState(false);
 
   useEffect(() => {
     setH(myTipProp?.h ?? 0);
@@ -24,6 +35,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
     setMyTip(myTipProp);
     setDone(false);
     setSaving(false);
+    setShowTable(false);
   }, [match._id]);
 
   // lock body scroll while open
@@ -31,6 +43,17 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
     document.documentElement.style.overflow = "hidden";
     return () => { document.documentElement.style.overflow = ""; };
   }, []);
+
+  const groupRows = useMemo(() => {
+    if (!match.group || !groupMatches.length) return null;
+    const standings = calcStandings(groupMatches);
+    return standings[match.group] ?? null;
+  }, [match.group, groupMatches]);
+
+  const homePos  = groupRows ? groupRows.findIndex(r => r.team === match.home)  + 1 : null;
+  const awayPos  = groupRows ? groupRows.findIndex(r => r.team === match.away)  + 1 : null;
+  const homeRow  = groupRows ? groupRows.find(r => r.team === match.home)  : null;
+  const awayRow  = groupRows ? groupRows.find(r => r.team === match.away)  : null;
 
   const locked = isDeadlinePast(match.kickoff);
   const isLate = locked && !match.finished;
@@ -95,12 +118,24 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
           <span className={s.mpDay}>{phaseLabel}</span>
           {match.group && <span className={s.mpGroup}>Gruppe {match.group}</span>}
           <span className={s.mpDate}>{dateStr}</span>
+          {groupRows && (
+            <button
+              className={`${s.tableBtn}${showTable ? " " + s.tableBtnActive : ""}`}
+              onClick={() => setShowTable(v => !v)}
+            >
+              <TableIcon />
+              Tabelle
+            </button>
+          )}
         </div>
 
         <div className={s.mpTeams}>
           <div className={s.mpTeamCol}>
             <span className={s.mpFlag}>{match.homeFlag}</span>
             <span className={s.mpName}>{match.home}</span>
+            {homePos && (
+              <span className={`${s.mpRank}${homePos <= 2 ? " " + s.mpRankQual : ""}`}>{homePos}. Platz</span>
+            )}
             {match.homeForm?.length > 0 && (
               <div className={s.mpForm}>
                 {match.homeForm.map((r, i) => (
@@ -117,6 +152,9 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
           <div className={`${s.mpTeamCol} ${s.mpTeamAway}`}>
             <span className={s.mpFlag}>{match.awayFlag}</span>
             <span className={s.mpName}>{match.away}</span>
+            {awayPos && (
+              <span className={`${s.mpRank}${awayPos <= 2 ? " " + s.mpRankQual : ""}`}>{awayPos}. Platz</span>
+            )}
             {match.awayForm?.length > 0 && (
               <div className={s.mpForm}>
                 {match.awayForm.map((r, i) => (
@@ -126,6 +164,52 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
             )}
           </div>
         </div>
+
+        <AnimatePresence>
+          {showTable && groupRows && (
+            <motion.div
+              className={s.tableWrap}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22, ease: "easeInOut" }}
+            >
+              <div className={s.table}>
+                <div className={`${s.tableRow} ${s.tableHead}`}>
+                  <span className={s.tableTeamCol} />
+                  <span className={s.tableNum}>Sp</span>
+                  <span className={s.tableNum}>S</span>
+                  <span className={s.tableNum}>U</span>
+                  <span className={s.tableNum}>N</span>
+                  <span className={s.tableNum}>T</span>
+                  <span className={s.tableNum}>±</span>
+                  <span className={`${s.tableNum} ${s.tablePts}`}>P</span>
+                </div>
+                {groupRows.map((r, i) => (
+                  <div
+                    key={r.team}
+                    className={`${s.tableRow}${i < 2 ? " " + s.tableQual : ""}${
+                      r.team === match.home || r.team === match.away ? " " + s.tableHighlight : ""
+                    }`}
+                  >
+                    <span className={s.tableTeamCol}>
+                      <span className={s.tableRank}>{i + 1}</span>
+                      <span className={s.tableFlag}>{r.flag}</span>
+                      <span className={s.tableName}>{r.team}</span>
+                    </span>
+                    <span className={s.tableNum}>{r.played}</span>
+                    <span className={s.tableNum}>{r.won}</span>
+                    <span className={s.tableNum}>{r.drawn}</span>
+                    <span className={s.tableNum}>{r.lost}</span>
+                    <span className={s.tableNum}>{r.gf}:{r.ga}</span>
+                    <span className={s.tableNum}>{r.gf - r.ga > 0 ? "+" : ""}{r.gf - r.ga}</span>
+                    <span className={`${s.tableNum} ${s.tablePts}`}>{r.pts}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className={s.navSection}>
           <div className={s.navLabel}>Spiel</div>
