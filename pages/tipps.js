@@ -8,6 +8,7 @@ import MatchCard from "../components/MatchCard/MatchCard";
 import MatchCardSkeleton from "../components/MatchCard/MatchCardSkeleton";
 import MatchSheet from "../components/MatchSheet";
 import s from "../styles/Page.module.css";
+import { AnimatePresence, motion } from "framer-motion";
 import { haptic } from "../utils/haptic";
 
 const LOCK_MIN = 60;
@@ -41,6 +42,7 @@ export default function TippsPage({ initialData }) {
   const [selected, setSelected] = useState(defaultMatchday);
   const activePillRef = useRef(null);
   const mdNavRef = useRef(null);
+  const slideDir = useRef(1);
 
   // sync selected to defaultMatchday once data loads
   useEffect(() => {
@@ -68,8 +70,8 @@ export default function TippsPage({ initialData }) {
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     swipeStartX.current = null;
     if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    if (dx < 0 && nextDay) { setSelected(nextDay);  haptic(8); }
-    if (dx > 0 && prevDay) { setSelected(prevDay);  haptic(8); }
+    if (dx < 0 && nextDay) { slideDir.current = 1;  setSelected(nextDay);  haptic(8); }
+    if (dx > 0 && prevDay) { slideDir.current = -1; setSelected(prevDay);  haptic(8); }
   }
 
   // overlay state
@@ -95,8 +97,14 @@ export default function TippsPage({ initialData }) {
     router.push(`/tipps?match=${id}`, undefined, { shallow: true });
   }
 
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastTimer = useRef(null);
+
   function handleTipSaved(matchId, tip) {
     setMyTipsMap(prev => ({ ...prev, [matchId]: tip }));
+    setToastVisible(true);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToastVisible(false), 2500);
   }
 
   // compute prev/next for sheet (within same matchday)
@@ -174,7 +182,7 @@ export default function TippsPage({ initialData }) {
                     key={d}
                     ref={d === selected ? activePillRef : null}
                     className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
-                    onClick={() => setSelected(d)}
+                    onClick={() => { slideDir.current = d > selected ? 1 : -1; setSelected(d); }}
                   >
                     T{d}
                   </button>
@@ -185,7 +193,7 @@ export default function TippsPage({ initialData }) {
                     key={d}
                     ref={d === selected ? activePillRef : null}
                     className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
-                    onClick={() => setSelected(d)}
+                    onClick={() => { slideDir.current = d > selected ? 1 : -1; setSelected(d); }}
                   >
                     {KO_LABELS[d] ?? `T${d}`}
                   </button>
@@ -195,56 +203,92 @@ export default function TippsPage({ initialData }) {
           </div>
 
           <div className={s.mdDayNav}>
-            <button className={s.mdDayBtn} onClick={() => prevDay && setSelected(prevDay)} disabled={!prevDay}>
+            <button className={s.mdDayBtn} onClick={() => { if (prevDay) { slideDir.current = -1; setSelected(prevDay); } }} disabled={!prevDay}>
               <span className={s.mdDayBtnArrow}>←</span> Vorheriger
             </button>
-            <button className={s.mdDayBtn} onClick={() => nextDay && setSelected(nextDay)} disabled={!nextDay}>
+            <button className={s.mdDayBtn} onClick={() => { if (nextDay) { slideDir.current = 1; setSelected(nextDay); } }} disabled={!nextDay}>
               Nächster <span className={s.mdDayBtnArrow}>→</span>
             </button>
           </div>
 
-          {!data ? (
-            <div className={s.mlist}>
-              {[0,1,2,3].map(i => <MatchCardSkeleton key={i} />)}
-            </div>
-          ) : currentMatches.length === 0 ? (
-            <div className={s.emptyState}>
-              <span className={s.emptyIcon}>📭</span>
-              <p className={s.emptyTitle}>Keine Spiele an diesem Spieltag</p>
-            </div>
-          ) : isGroupStage ? (
-            groups?.map(g => {
-              const gMatches = currentMatches.filter(m => m.group === g);
-              return (
-                <div key={g}>
-                  <div className={s.slbl}>Gruppe {g}</div>
-                  <div className={s.mlist}>{renderCards(gMatches)}</div>
-                </div>
-              );
-            })
-          ) : (
-            <>
-              <div className={s.slbl}>{sectionHeader}</div>
-              <div className={s.mlist}>{renderCards(currentMatches)}</div>
-            </>
-          )}
+          <div style={{ overflowX: "clip" }}>
+            {!data ? (
+              <div className={s.mlist}>
+                {[0,1,2,3].map(i => <MatchCardSkeleton key={i} />)}
+              </div>
+            ) : (
+              <AnimatePresence mode="wait" custom={slideDir.current}>
+                <motion.div
+                  key={selected}
+                  custom={slideDir.current}
+                  variants={{
+                    enter: (dir) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
+                    center: { x: 0, opacity: 1 },
+                    exit:  (dir) => ({ x: dir > 0 ? -50 : 50, opacity: 0 }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.16, ease: "easeInOut" }}
+                >
+                  {currentMatches.length === 0 ? (
+                    <div className={s.emptyState}>
+                      <span className={s.emptyIcon}>📭</span>
+                      <p className={s.emptyTitle}>Keine Spiele an diesem Spieltag</p>
+                    </div>
+                  ) : isGroupStage ? (
+                    groups?.map(g => {
+                      const gMatches = currentMatches.filter(m => m.group === g);
+                      return (
+                        <div key={g}>
+                          <div className={s.slbl}>Gruppe {g}</div>
+                          <div className={s.mlist}>{renderCards(gMatches)}</div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <div className={s.slbl}>{sectionHeader}</div>
+                      <div className={s.mlist}>{renderCards(currentMatches)}</div>
+                    </>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
         </div>
       </div>
 
-      {sheetMatch && (
-        <MatchSheet
-          match={sheetMatch}
-          myTip={myTipsMap[sheetId] ?? null}
-          otherTips={otherTipsMap[sheetId] ?? []}
-          prevId={prevId}
-          nextId={nextId}
-          prevDayId={prevDayId}
-          nextDayId={nextDayId}
-          onClose={closeSheet}
-          onNavigate={navigateSheet}
-          onTipSaved={handleTipSaved}
-        />
-      )}
+      <AnimatePresence>
+        {sheetMatch && (
+          <MatchSheet
+            match={sheetMatch}
+            myTip={myTipsMap[sheetId] ?? null}
+            otherTips={otherTipsMap[sheetId] ?? []}
+            prevId={prevId}
+            nextId={nextId}
+            prevDayId={prevDayId}
+            nextDayId={nextDayId}
+            onClose={closeSheet}
+            onNavigate={navigateSheet}
+            onTipSaved={handleTipSaved}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {toastVisible && (
+          <motion.div
+            className={s.toast}
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+          >
+            ✓ Tipp gespeichert
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

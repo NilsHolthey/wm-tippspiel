@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, useDragControls } from "framer-motion";
 import Stepper from "./MatchCard/Stepper";
 import { calcPoints } from "../lib/scoring";
 import s from "./MatchSheet.module.css";
@@ -10,6 +11,7 @@ function isDeadlinePast(kickoff) {
 const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
 
 export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], prevId, nextId, prevDayId, nextDayId, onClose, onNavigate, onTipSaved }) {
+  const dragControls = useDragControls();
   const [h, setH] = useState(myTipProp?.h ?? 0);
   const [a, setA] = useState(myTipProp?.a ?? 0);
   const [myTip, setMyTip] = useState(myTipProp);
@@ -61,7 +63,24 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
   const phaseLabel = KO_HEADERS[match.matchday] ?? `Spieltag ${match.matchday}`;
 
   return (
-    <div className={s.sheet}>
+    <motion.div
+      className={s.sheet}
+      drag="y"
+      dragControls={dragControls}
+      dragListener={false}
+      dragConstraints={{ top: 0 }}
+      dragElastic={{ top: 0, bottom: 0.35 }}
+      onDragEnd={(_, info) => {
+        if (info.offset.y > 120 || info.velocity.y > 500) onClose();
+      }}
+      initial={{ y: "100%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ type: "spring", damping: 30, stiffness: 280 }}
+    >
+      <div className={s.handleWrap} onPointerDown={(e) => dragControls.start(e)}>
+        <div className={s.handle} />
+      </div>
       <div className={s.header}>
         <button className={s.back} onClick={onClose}>← Zurück</button>
       </div>
@@ -174,6 +193,6 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
