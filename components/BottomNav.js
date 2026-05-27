@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import s from "./BottomNav.module.css";
+import { haptic } from "../utils/haptic";
 
 const IconHome = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -40,17 +41,59 @@ const ITEMS = [
 
 export default function BottomNav() {
   const router = useRouter();
+  const [preview, setPreview]   = useState(null);
+  const dragRef                  = useRef(null);
+
   if (router.pathname === "/login") return null;
 
+  function hrefFromTouch(touch) {
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    return el?.closest("[data-href]")?.dataset?.href ?? null;
+  }
+
+  function handleTouchStart(e) {
+    const href = hrefFromTouch(e.touches[0]);
+    dragRef.current = href;
+    setPreview(href);
+  }
+
+  function handleTouchMove(e) {
+    const href = hrefFromTouch(e.touches[0]);
+    if (href && href !== dragRef.current) {
+      dragRef.current = href;
+      setPreview(href);
+      haptic(6);
+    }
+  }
+
+  function handleTouchEnd(e) {
+    e.preventDefault();
+    const href = dragRef.current;
+    dragRef.current = null;
+    setPreview(null);
+    if (href) router.push(href);
+  }
+
   return (
-    <nav className={s.nav}>
+    <nav
+      className={s.nav}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {ITEMS.map(({ href, Icon, label }) => {
-        const active = href === "/" ? router.pathname === "/" : router.pathname.startsWith(href);
+        const isActive    = href === "/" ? router.pathname === "/" : router.pathname.startsWith(href);
+        const isPreviewing = preview === href;
+        const active       = preview ? isPreviewing : isActive;
         return (
-          <Link key={href} href={href} className={`${s.item}${active ? " " + s.active : ""}`}>
+          <div
+            key={href}
+            data-href={href}
+            className={`${s.item}${active ? " " + s.active : ""}${isPreviewing ? " " + s.previewing : ""}`}
+          >
             <Icon />
             <span className={s.label}>{label}</span>
-          </Link>
+          </div>
         );
       })}
     </nav>

@@ -8,6 +8,7 @@ import MatchCard from "../components/MatchCard/MatchCard";
 import MatchCardSkeleton from "../components/MatchCard/MatchCardSkeleton";
 import MatchSheet from "../components/MatchSheet";
 import s from "../styles/Page.module.css";
+import { haptic } from "../utils/haptic";
 
 const LOCK_MIN = 60;
 const KO_LABELS  = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
@@ -48,6 +49,26 @@ export default function TippsPage({ initialData }) {
   useEffect(() => {
     activePillRef.current?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
   }, [selected]);
+
+  // swipe gesture
+  const swipeStartX = useRef(null);
+  const swipeStartY = useRef(null);
+
+  function handleSwipeStart(e) {
+    if (sheetId) return;
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+  }
+
+  function handleSwipeEnd(e) {
+    if (sheetId || swipeStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - swipeStartX.current;
+    const dy = e.changedTouches[0].clientY - swipeStartY.current;
+    swipeStartX.current = null;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0 && nextDay) { setSelected(nextDay);  haptic(8); }
+    if (dx > 0 && prevDay) { setSelected(prevDay);  haptic(8); }
+  }
 
   // overlay state
   const [sheetId, setSheetId] = useState(null);
@@ -126,7 +147,7 @@ export default function TippsPage({ initialData }) {
       <Head><title>Tipps – WM Tippspiel</title></Head>
       <div className={s.app}>
         <Nav />
-        <div className={s.wrap}>
+        <div className={s.wrap} onTouchStart={handleSwipeStart} onTouchEnd={handleSwipeEnd}>
           <div className={s.ph}>
             <div className={s.ptitle}>MEINE <span>TIPPS</span></div>
             {allOpen.length > 0 && (
@@ -183,6 +204,11 @@ export default function TippsPage({ initialData }) {
           {!data ? (
             <div className={s.mlist}>
               {[0,1,2,3].map(i => <MatchCardSkeleton key={i} />)}
+            </div>
+          ) : currentMatches.length === 0 ? (
+            <div className={s.emptyState}>
+              <span className={s.emptyIcon}>📭</span>
+              <p className={s.emptyTitle}>Keine Spiele an diesem Spieltag</p>
             </div>
           ) : isGroupStage ? (
             groups?.map(g => {

@@ -16,9 +16,21 @@ export default function Nav() {
   const router = useRouter();
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => { setOpen(false); }, [router.pathname]);
 
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(prev => {
+        if (!prev && window.scrollY > 64) return true;
+        if (prev  && window.scrollY < 32) return false;
+        return prev;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const initials = session?.user?.name
     ?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) ?? "?";
@@ -29,7 +41,7 @@ export default function Nav() {
 
   return (
     <>
-      <nav className={s.nav}>
+      <nav className={`${s.nav}${scrolled ? " " + s.navScrolled : ""}`}>
         <Link href="/" className={s.logo}>
           <Image src="/icons/Icon_logo.png" alt="WM Tippspiel" width={28} height={28} className={s.logoImg} />
           <span>WM</span> TIPP
