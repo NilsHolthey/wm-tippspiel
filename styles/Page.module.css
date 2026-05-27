@@ -125,6 +125,24 @@
 .mdPillActive { color: var(--gold) !important; border-color: rgba(201,168,76,0.55) !important; background: rgba(201,168,76,0.07) !important; }
 .mdSep { width: 1px; flex-shrink: 0; background: var(--border); margin: 4px 6px; }
 
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.mdPillSkeleton {
+  pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  ) !important;
+  background-size: 1200px 100% !important;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-color: transparent !important;
+  color: transparent !important;
+}
+
 /* section label */
 .slbl { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; margin-top: 6px; }
 .mlist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }

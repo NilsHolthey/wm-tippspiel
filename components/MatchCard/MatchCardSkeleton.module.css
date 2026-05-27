@@ -1,0 +1,48 @@
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.bone {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+.inner { padding: 12px 16px 10px; }
+
+.metaRow { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+.metaPill { width: 38px; height: 15px; }
+.metaDate { width: 88px; height: 13px; }
+
+.row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.team { display: flex; align-items: center; gap: 7px; }
+.teamAway { justify-content: flex-end; }
+.flag { width: 30px; height: 22px; border-radius: 3px; flex-shrink: 0; }
+.name { width: 68px; height: 15px; }
+.score { width: 44px; height: 28px; border-radius: 6px; }
+
+.strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--d3);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 16px;
+}
+.stripLeft  { width: 100px; height: 13px; }
+.stripRight { width: 52px; height: 28px; border-radius: 6px; }
