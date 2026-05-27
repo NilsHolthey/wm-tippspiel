@@ -40,6 +40,7 @@ export default function TippsPage({ initialData }) {
 
   const [selected, setSelected] = useState(defaultMatchday);
   const activePillRef = useRef(null);
+  const mdNavRef = useRef(null);
 
   // sync selected to defaultMatchday once data loads
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function TippsPage({ initialData }) {
 
   function handleSwipeStart(e) {
     if (sheetId) return;
+    if (mdNavRef.current?.contains(e.target)) return;
     swipeStartX.current = e.touches[0].clientX;
     swipeStartY.current = e.touches[0].clientY;
   }
@@ -160,7 +162,7 @@ export default function TippsPage({ initialData }) {
             )}
           </div>
 
-          <div className={s.mdNav}>
+          <div className={s.mdNav} ref={mdNavRef}>
             {!data ? (
               ["T1","T2","T3","T4","T5","T6","T7","T8"].map(lbl => (
                 <div key={lbl} className={`${s.mdPill} ${s.mdPillSkeleton}`}>{lbl}</div>
