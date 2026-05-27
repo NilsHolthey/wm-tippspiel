@@ -34,11 +34,29 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
     };
   }, [router]);
 
+  const showChrome = router.pathname !== "/login";
+
   return (
     <SessionProvider session={session}>
       {loading && <LoadingScreen />}
       <OfflineBanner />
+      {showChrome && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0,
+          height: "80px",
+          background: "linear-gradient(to bottom, #060A1B 0%, transparent 100%)",
+          zIndex: 190, pointerEvents: "none",
+        }} />
+      )}
       <Component {...pageProps} />
+      {showChrome && (
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0,
+          height: "110px",
+          background: "linear-gradient(to top, #060A1B 0%, transparent 100%)",
+          zIndex: 190, pointerEvents: "none",
+        }} />
+      )}
       <BottomNav />
     </SessionProvider>
   );
