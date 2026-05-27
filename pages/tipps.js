@@ -269,6 +269,7 @@ export default function TippsPage({ initialData }) {
             match={sheetMatch}
             myTip={myTipsMap[sheetId] ?? null}
             otherTips={otherTipsMap[sheetId] ?? []}
+            groupMatches={sheetMatch?.group ? matches.filter(m => m.group === sheetMatch.group) : []}
             prevId={prevId}
             nextId={nextId}
             prevDayId={prevDayId}

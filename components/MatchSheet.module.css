@@ -131,6 +131,78 @@
 .mpSubmitLate { background: linear-gradient(135deg, #7a6000, var(--yellow)); color: #1a1400; }
 .mpSubmitDone { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.35); }
 
+.mpRank {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1;
+}
+
+.mpRankQual { color: var(--gold); }
+
+.tableBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.tableBtn:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+.tableBtnActive { color: var(--gold) !important; border-color: rgba(201,168,76,0.45) !important; background: rgba(201,168,76,0.1) !important; }
+
+.tableWrap { overflow: hidden; margin-bottom: 16px; }
+
+.table {
+  background: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr repeat(7, 26px);
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  align-items: center;
+}
+.tableRow:last-child { border-bottom: none; }
+
+.tableHead {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.6;
+  padding-top: 8px;
+  padding-bottom: 4px;
+}
+
+.tableQual { border-left: 2px solid rgba(201,168,76,0.4); }
+.tableHighlight { background: rgba(255,255,255,0.03); }
+
+.tableTeamCol { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.tableRank { width: 12px; font-size: 0.62rem; color: var(--muted); flex-shrink: 0; }
+.tableFlag { font-size: 0.88rem; flex-shrink: 0; }
+.tableName { font-size: 0.73rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.tableNum { text-align: center; font-size: 0.73rem; color: var(--muted); }
+.tablePts { color: var(--gold); font-weight: 700; }
+
 .mpFinished { text-align: center; font-size: 0.85rem; color: var(--muted); font-style: italic; padding: 20px 0; }
 
 .mpOthers { background: linear-gradient(145deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%); border: 1px solid rgba(255,255,255,0.07); box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07); border-radius: 20px; padding: 16px 20px; }

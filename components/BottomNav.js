@@ -41,8 +41,8 @@ const ITEMS = [
 
 export default function BottomNav() {
   const router = useRouter();
-  const [preview, setPreview]   = useState(null);
-  const dragRef                  = useRef(null);
+  const [preview, setPreview] = useState(null);
+  const dragRef               = useRef(null);
 
   if (router.pathname === "/login") return null;
 
@@ -71,7 +71,13 @@ export default function BottomNav() {
     const href = dragRef.current;
     dragRef.current = null;
     setPreview(null);
-    if (href) router.push(href);
+    if (!href) return;
+    const isCurrentPage = href === "/" ? router.pathname === "/" : router.pathname.startsWith(href);
+    if (isCurrentPage) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      router.push(href);
+    }
   }
 
   return (

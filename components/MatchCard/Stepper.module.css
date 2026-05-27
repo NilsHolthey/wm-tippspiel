@@ -46,6 +46,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .val {
@@ -61,6 +62,6 @@
 @media (max-width: 600px) {
   .btn { width: 64px; height: 56px; }
   .icon { font-size: 32px; }
-  .number { width: 64px; height: 72px; }
+  .number { width: 64px; height: 72px; overflow: hidden; }
   .val { font-size: 3rem; }
 }
