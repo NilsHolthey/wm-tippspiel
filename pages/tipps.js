@@ -148,6 +148,7 @@ export default function TippsPage({ initialData }) {
         otherTips={otherTipsMap[m._id] ?? []}
         onOpen={() => openSheet(m._id)}
         index={i}
+        dir={slideDir.current}
       />
     ));
   }
@@ -213,23 +214,26 @@ export default function TippsPage({ initialData }) {
 
           <div style={{ overflowX: "clip" }}>
             {!data ? (
-              <div className={s.mlist}>
-                {[0,1,2,3].map(i => <MatchCardSkeleton key={i} />)}
-              </div>
+              <>
+                {[0, 1].map(g => (
+                  <div key={g}>
+                    <div className={s.slblSkeleton} />
+                    <div className={s.mlist}>
+                      {[0, 1, 2].map(i => <MatchCardSkeleton key={i} />)}
+                    </div>
+                  </div>
+                ))}
+              </>
             ) : (
-              <AnimatePresence mode="wait" custom={slideDir.current}>
+              <AnimatePresence mode="wait" custom={slideDir.current} initial={false}>
                 <motion.div
                   key={selected}
                   custom={slideDir.current}
                   variants={{
-                    enter: (dir) => ({ x: dir > 0 ? 50 : -50, opacity: 0 }),
-                    center: { x: 0, opacity: 1 },
-                    exit:  (dir) => ({ x: dir > 0 ? -50 : 50, opacity: 0 }),
+                    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -40 : 40 }),
                   }}
-                  initial="enter"
-                  animate="center"
                   exit="exit"
-                  transition={{ duration: 0.16, ease: "easeInOut" }}
+                  transition={{ duration: 0.1, ease: "easeIn" }}
                 >
                   {currentMatches.length === 0 ? (
                     <div className={s.emptyState}>

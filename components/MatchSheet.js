@@ -78,11 +78,16 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], pr
       exit={{ y: "100%" }}
       transition={{ type: "spring", damping: 30, stiffness: 280 }}
     >
-      <div className={s.handleWrap} onPointerDown={(e) => dragControls.start(e)}>
-        <div className={s.handle} />
-      </div>
-      <div className={s.header}>
-        <button className={s.back} onClick={onClose}>← Zurück</button>
+      <div
+        className={s.dragZone}
+        onPointerDown={(e) => { if (!e.target.closest("button")) dragControls.start(e); }}
+      >
+        <div className={s.handleWrap}>
+          <div className={s.handle} />
+        </div>
+        <div className={s.header}>
+          <button className={s.back} onClick={onClose}>← Zurück</button>
+        </div>
       </div>
 
       <div className={s.content}>

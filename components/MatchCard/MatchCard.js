@@ -32,7 +32,7 @@ function countdownStr(kickoff) {
   return `noch ${m}min`;
 }
 
-export default function MatchCard({ match, myTip, otherTips = [], onOpen, index = 0 }) {
+export default function MatchCard({ match, myTip, otherTips = [], onOpen, index = 0, dir = 0 }) {
   const locked      = isLocked(match.kickoff);
   const urgent      = isUrgent(match.kickoff);
   const hasTip      = !!myTip && myTip.lateStatus !== "pending";
@@ -61,9 +61,9 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen, index 
     <motion.div
       className={cardClass}
       onClick={onOpen}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, ease: "easeOut", delay: index * 0.045 }}
+      initial={{ x: dir * 36, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.2, ease: "easeOut", delay: index * 0.055 }}
     >
       <div className={s.inner}>
         <div className={s.meta}>

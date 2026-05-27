@@ -8,12 +8,15 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+.dragZone {
+  touch-action: none;
+  cursor: grab;
+}
+
 .handleWrap {
   display: flex;
   justify-content: center;
   padding: 10px 0 2px;
-  touch-action: none;
-  cursor: grab;
 }
 
 .handle {

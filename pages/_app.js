@@ -12,7 +12,8 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
   const hideTimer = useRef(null);
 
   useEffect(() => {
-    const start = () => {
+    const start = (_url, { shallow } = {}) => {
+      if (shallow) return;
       clearTimeout(hideTimer.current);
       setLoading(true);
     };
