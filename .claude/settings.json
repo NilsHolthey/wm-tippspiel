@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir -p /Users/nilsholthey/Workspace/NHolthey/wm-tippspiel/pages/tipps)"
+      "Bash(mkdir -p /Users/nilsholthey/Workspace/NHolthey/wm-tippspiel/pages/tipps)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "additionalDirectories": [
       "/Users/nilsholthey/Workspace/NHolthey/wm-tippspiel/pages"
