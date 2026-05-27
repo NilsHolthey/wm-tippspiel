@@ -5,6 +5,7 @@ import { getSession } from "next-auth/react";
 import useSWR from "swr";
 import Nav from "../components/Nav";
 import MatchCard from "../components/MatchCard/MatchCard";
+import MatchCardSkeleton from "../components/MatchCard/MatchCardSkeleton";
 import MatchSheet from "../components/MatchSheet";
 import s from "../styles/Page.module.css";
 
@@ -139,27 +140,35 @@ export default function TippsPage({ initialData }) {
           </div>
 
           <div className={s.mdNav}>
-            {groupStagedays.map(d => (
-              <button
-                key={d}
-                ref={d === selected ? activePillRef : null}
-                className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
-                onClick={() => setSelected(d)}
-              >
-                T{d}
-              </button>
-            ))}
-            {groupStagedays.length > 0 && koDays.length > 0 && <div className={s.mdSep} />}
-            {koDays.map(d => (
-              <button
-                key={d}
-                ref={d === selected ? activePillRef : null}
-                className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
-                onClick={() => setSelected(d)}
-              >
-                {KO_LABELS[d] ?? `T${d}`}
-              </button>
-            ))}
+            {!data ? (
+              ["T1","T2","T3","T4","T5","T6","T7","T8"].map(lbl => (
+                <div key={lbl} className={`${s.mdPill} ${s.mdPillSkeleton}`}>{lbl}</div>
+              ))
+            ) : (
+              <>
+                {groupStagedays.map(d => (
+                  <button
+                    key={d}
+                    ref={d === selected ? activePillRef : null}
+                    className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
+                    onClick={() => setSelected(d)}
+                  >
+                    T{d}
+                  </button>
+                ))}
+                {groupStagedays.length > 0 && koDays.length > 0 && <div className={s.mdSep} />}
+                {koDays.map(d => (
+                  <button
+                    key={d}
+                    ref={d === selected ? activePillRef : null}
+                    className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
+                    onClick={() => setSelected(d)}
+                  >
+                    {KO_LABELS[d] ?? `T${d}`}
+                  </button>
+                ))}
+              </>
+            )}
           </div>
 
           <div className={s.mdDayNav}>
@@ -171,7 +180,11 @@ export default function TippsPage({ initialData }) {
             </button>
           </div>
 
-          {isGroupStage ? (
+          {!data ? (
+            <div className={s.mlist}>
+              {[0,1,2,3].map(i => <MatchCardSkeleton key={i} />)}
+            </div>
+          ) : isGroupStage ? (
             groups?.map(g => {
               const gMatches = currentMatches.filter(m => m.group === g);
               return (
