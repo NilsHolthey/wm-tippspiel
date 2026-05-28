@@ -139,7 +139,7 @@ export default function GruppenPage({ groups, standings }) {
         <Nav />
         <div className={s.wrap}>
           <div className={s.ph} style={{ marginBottom: 22 }}>
-            <div className={s.ptitle}>⚽ <span>GRUPPEN</span></div>
+            <div className={s.ptitle}><span>GRUPPEN</span></div>
           </div>
 
           <div className={s.grpGrid}>

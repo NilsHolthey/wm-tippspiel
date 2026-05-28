@@ -3,6 +3,7 @@ import { motion, useDragControls, AnimatePresence } from "framer-motion";
 import Stepper from "./MatchCard/Stepper";
 import { calcPoints } from "../lib/scoring";
 import { calcStandings } from "../lib/standings";
+import { IconWarning, IconCheck } from "./Icons";
 import s from "./MatchSheet.module.css";
 
 const LOCK_MIN = 60;
@@ -224,7 +225,10 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
         </div>
 
         {isLate && (
-          <div className={s.mpLate}>⚠️ Deadline abgelaufen — Admin muss diesen Tipp bestätigen</div>
+          <div className={s.mpLate} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <IconWarning size={15} style={{ flexShrink: 0 }} />
+            Deadline abgelaufen — Admin muss diesen Tipp bestätigen
+          </div>
         )}
 
         {!match.finished ? (
@@ -246,7 +250,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
               onClick={submit}
               disabled={done || saving}
             >
-              {done ? "✓ Gespeichert!" : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
+              {done ? <><IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />Gespeichert!</> : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
             </button>
           </div>
         ) : (

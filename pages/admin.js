@@ -3,6 +3,7 @@ import Head from "next/head";
 import { getSession } from "next-auth/react";
 import Nav from "../components/Nav";
 import MiniStepper from "../components/MiniStepper";
+import { IconClock, IconUser, IconRefresh, IconHourglass, IconCheck, IconX } from "../components/Icons";
 import s from "../styles/Page.module.css";
 
 function AdminResultRow({ match }) {
@@ -34,7 +35,7 @@ function AdminResultRow({ match }) {
           <MiniStepper value={rA} onChange={setRA} />
         </div>
         {done
-          ? <div className={s.arowDoneLabel}>✅ {rH}:{rA} gespeichert</div>
+          ? <div className={s.arowDoneLabel}><IconCheck size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />{rH}:{rA} gespeichert</div>
           : <button className={s.arowSave} onClick={save} disabled={saving}>
               {saving ? "Speichert…" : "Speichern"}
             </button>
@@ -67,15 +68,19 @@ function SyncSection() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
       <button className={s.arowSave} onClick={sync} disabled={loading} style={{ height: "auto", padding: "8px 16px" }}>
-        {loading ? "⏳ Synchronisiere…" : "🔄 Ergebnisse synchronisieren"}
+        {loading
+          ? <><IconHourglass size={13} style={{ verticalAlign: "middle", marginRight: 5 }} />Synchronisiere…</>
+          : <><IconRefresh size={13} style={{ verticalAlign: "middle", marginRight: 5 }} />Ergebnisse synchronisieren</>
+        }
       </button>
       {status && (
-        <span style={{ fontSize: "0.82rem", color: status.ok ? "var(--green)" : "var(--red)" }}>
+        <span style={{ fontSize: "0.82rem", color: status.ok ? "var(--green)" : "var(--red)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+          {status.ok ? <IconCheck size={13} /> : <IconX size={13} />}
           {status.ok
             ? status.data.updated === 0 && status.data.namesUpdated === 0
               ? `Keine Änderungen (${status.data.checked} Spiele geprüft)`
-              : `✅ ${status.data.updated} Ergebnis(se)${status.data.namesUpdated ? `, ${status.data.namesUpdated} Teamnamen` : ""} aktualisiert${status.data.details.length ? `: ${status.data.details.map(d => `${d.match} ${d.result}`).join(", ")}` : ""}`
-            : `✗ Fehler: ${status.msg}`}
+              : `${status.data.updated} Ergebnis(se)${status.data.namesUpdated ? `, ${status.data.namesUpdated} Teamnamen` : ""} aktualisiert${status.data.details.length ? `: ${status.data.details.map(d => `${d.match} ${d.result}`).join(", ")}` : ""}`
+            : `Fehler: ${status.msg}`}
         </span>
       )}
     </div>
@@ -101,12 +106,12 @@ export default function AdminPage({ matches, lateRequestsInit }) {
         <Nav />
         <div className={s.wrap}>
           <div className={s.ph} style={{ marginBottom: 22 }}>
-            <div className={s.ptitle}>⚙️ <span>ADMIN</span></div>
+            <div className={s.ptitle}><span>ADMIN</span></div>
           </div>
 
           <div className={s.asec}>
             <div className={s.asecTitle}>
-              ⏰ Verspätete Anfragen
+              <IconClock size={14} /> Verspätete Anfragen
               {lateRequests.length > 0 && (
                 <span className={s.nbadge}>{lateRequests.length}</span>
               )}
@@ -117,7 +122,7 @@ export default function AdminPage({ matches, lateRequestsInit }) {
               lateRequests.map((r) => (
                 <div key={r._id} className={s.lrrow}>
                   <div>
-                    <div className={s.lrWho}>👤 {r.user.username}</div>
+                    <div className={s.lrWho}><IconUser size={13} style={{ verticalAlign: "middle", marginRight: 5 }} />{r.user.username}</div>
                     <div className={s.lrMatch}>
                       {r.match.homeFlag} {r.match.home} vs {r.match.away} {r.match.awayFlag}
                     </div>
@@ -129,8 +134,8 @@ export default function AdminPage({ matches, lateRequestsInit }) {
                     </div>
                   </div>
                   <div className={s.lrBtns}>
-                    <button className={s.btnOk} onClick={() => handleRequest(r._id, "approve")}>✓ Genehmigen</button>
-                    <button className={s.btnNo} onClick={() => handleRequest(r._id, "reject")}>✗ Ablehnen</button>
+                    <button className={s.btnOk} onClick={() => handleRequest(r._id, "approve")}><IconCheck size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />Genehmigen</button>
+                    <button className={s.btnNo} onClick={() => handleRequest(r._id, "reject")}><IconX size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />Ablehnen</button>
                   </div>
                 </div>
               ))
@@ -138,7 +143,7 @@ export default function AdminPage({ matches, lateRequestsInit }) {
           </div>
 
           <div className={s.asec}>
-            <div className={s.asecTitle}>🔄 Ergebnisse synchronisieren</div>
+            <div className={s.asecTitle}><IconRefresh size={14} /> Ergebnisse synchronisieren</div>
             <SyncSection />
             <span style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: 6, display: "block" }}>
               Zieht Ergebnisse und Teamnamen von openfootball (GitHub). Kein API-Key nötig.

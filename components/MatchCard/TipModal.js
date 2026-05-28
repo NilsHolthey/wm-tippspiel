@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Stepper from "./Stepper";
+import { IconWarning, IconCheck } from "../Icons";
 import s from "./TipModal.module.css";
 
 function pill(label, cls) {
@@ -119,7 +120,7 @@ export default function TipModal({ match, myTip, onClose, onSaved, onPrev, onNex
 
         {isLate && (
           <div className={s.lateWarning}>
-            <span>⚠️</span>
+            <IconWarning size={15} style={{ flexShrink: 0 }} />
             Deadline abgelaufen — Admin muss diesen Tipp bestätigen
           </div>
         )}
@@ -144,7 +145,7 @@ export default function TipModal({ match, myTip, onClose, onSaved, onPrev, onNex
               onClick={submit}
               disabled={done || saving}
             >
-              {done ? "✓ Gespeichert!" : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
+              {done ? <><IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />Gespeichert!</> : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
             </button>
           </div>
         ) : (
