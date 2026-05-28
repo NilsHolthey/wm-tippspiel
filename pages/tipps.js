@@ -7,6 +7,7 @@ import Nav from "../components/Nav";
 import MatchCard from "../components/MatchCard/MatchCard";
 import MatchCardSkeleton from "../components/MatchCard/MatchCardSkeleton";
 import MatchSheet from "../components/MatchSheet";
+import { IconInbox, IconCheck } from "../components/Icons";
 import s from "../styles/Page.module.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { haptic } from "../utils/haptic";
@@ -237,7 +238,7 @@ export default function TippsPage({ initialData }) {
                 >
                   {currentMatches.length === 0 ? (
                     <div className={s.emptyState}>
-                      <span className={s.emptyIcon}>📭</span>
+                      <IconInbox size={44} className={s.emptyIcon} style={{ color: "var(--muted)" }} />
                       <p className={s.emptyTitle}>Keine Spiele an diesem Spieltag</p>
                     </div>
                   ) : isGroupStage ? (
@@ -290,7 +291,8 @@ export default function TippsPage({ initialData }) {
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
           >
-            ✓ Tipp gespeichert
+            <IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 5 }} />
+            Tipp gespeichert
           </motion.div>
         )}
       </AnimatePresence>

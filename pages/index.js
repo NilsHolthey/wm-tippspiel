@@ -5,10 +5,9 @@ import { shortName } from "../lib/teamNames";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 import Nav from "../components/Nav";
+import { IconTrophy, IconSoccer, IconBarChart, IconList, IconClock } from "../components/Icons";
 import s from "../styles/Page.module.css";
 import { calcPoints } from "../lib/scoring";
-
-const MEDALS = ["🥇", "🥈", "🥉"];
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: null };
 const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
 
@@ -134,7 +133,7 @@ function MiniLeaderboard({ board, currentUserId }) {
     <div className={s.miniBoard}>
       {top5.map((p, i) => (
         <div key={p.id} className={`${s.mbRow}${p.id === currentUserId ? " " + s.mbRowMe : ""}`}>
-          <span className={s.mbRank}>{i < 3 ? MEDALS[i] : i + 1}</span>
+          <span className={s.mbRank}>{i + 1}</span>
           <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
           <span className={s.mbPts}>{p.pts}</span>
         </div>
@@ -157,7 +156,8 @@ function GroupsPreview({ standings, activeGroups }) {
   return (
     <div className={s.homeSec}>
       <div className={s.homeSecTitle}>
-        📊 Gruppen
+        <IconBarChart size={14} />
+        Gruppen
         <Link href="/gruppen" style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)", textDecoration: "none" }}>
           Alle →
         </Link>
@@ -184,7 +184,7 @@ function GroupsPreview({ standings, activeGroups }) {
 function Rules() {
   return (
     <div className={s.homeSec}>
-      <div className={s.homeSecTitle}>📋 Spielregeln</div>
+      <div className={s.homeSecTitle}><IconList size={14} /> Spielregeln</div>
 
       <div className={s.rulesGrid}>
         <div className={s.ruleCard}>
@@ -250,7 +250,7 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
               transition={{ duration: 0.28, ease: "easeOut", delay: 0.05 }}
             >
               <div className={s.homeSecTitle}>
-                ⏳ Nächste Spiele
+                <IconClock size={14} /> Nächste Spiele
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
               <UpcomingMatches matches={nextMatches} myTipsMap={myTipsMap} />
@@ -264,7 +264,7 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
               transition={{ duration: 0.28, ease: "easeOut", delay: 0.1 }}
             >
               <div className={s.homeSecTitle}>
-                🏆 Rangliste
+                <IconTrophy size={14} /> Rangliste
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
               <MiniLeaderboard board={board} currentUserId={currentUserId} />
@@ -277,7 +277,7 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.28, ease: "easeOut", delay: 0.15 }}
           >
-            <div className={s.homeSecTitle}>⚽ Letzte Ergebnisse</div>
+            <div className={s.homeSecTitle}><IconSoccer size={14} /> Letzte Ergebnisse</div>
             <RecentResults results={recentResults} myTipsMap={myTipsMap} />
           </motion.div>
 

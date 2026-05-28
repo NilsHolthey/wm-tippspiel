@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
 import Nav from "../../components/Nav";
 import Stepper from "../../components/MatchCard/Stepper";
+import { IconWarning, IconCheck } from "../../components/Icons";
 import s from "../../styles/Page.module.css";
 import { calcPoints } from "../../lib/scoring";
 import { shortName } from "../../lib/teamNames";
@@ -103,8 +104,9 @@ export default function MatchTipPage({ match, myTipInit, otherTips, prevId, next
           </div>
 
           {isLate && (
-            <div className={s.mpLate}>
-              ⚠️ Deadline abgelaufen — Admin muss diesen Tipp bestätigen
+            <div className={s.mpLate} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <IconWarning size={15} style={{ flexShrink: 0 }} />
+              Deadline abgelaufen — Admin muss diesen Tipp bestätigen
             </div>
           )}
 
@@ -127,7 +129,7 @@ export default function MatchTipPage({ match, myTipInit, otherTips, prevId, next
                 onClick={submit}
                 disabled={done || saving}
               >
-                {done ? "✓ Gespeichert!" : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
+                {done ? <><IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />Gespeichert!</> : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
               </button>
             </div>
           ) : (

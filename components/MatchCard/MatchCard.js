@@ -1,9 +1,21 @@
 import { motion } from "framer-motion";
 import s from "./MatchCard.module.css";
 import { calcPoints } from "../../lib/scoring";
+import { IconCheck, IconMinus, IconTrendUp, IconX, IconClock, IconHourglass, IconWarning } from "../Icons";
 
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: s.pts0 };
-const PTS_LBL = { 3: "✅ Treffer", 2: "〰 Differenz", 1: "↗ Tendenz", 0: "✗ Daneben" };
+const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
+const PTS_ICO = { 3: IconCheck, 2: IconMinus, 1: IconTrendUp, 0: IconX };
+
+function PtsStrip({ points }) {
+  const Icon = PTS_ICO[points];
+  return (
+    <span className={`${s.stripPts} ${PTS_CLS[points]}`}>
+      <Icon size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />
+      {PTS_LBL[points]} · {points} Pkt
+    </span>
+  );
+}
 
 const LOCK_MINUTES = 60;
 
@@ -72,8 +84,8 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen, index 
             : <span className={`${s.pill} ${s.pillDay}`}>{match.phase}</span>
           }
           <span className={s.metaDate}>{formatKickoff(match.kickoff)}</span>
-          {urgent && <span className={s.metaUrgent} suppressHydrationWarning>⏱ Deadline in {countdownStr(match.kickoff)}</span>}
-          {countdown && !urgent && <span className={s.metaSoon} suppressHydrationWarning>⏱ {countdown}</span>}
+          {urgent && <span className={s.metaUrgent} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />Deadline in {countdownStr(match.kickoff)}</span>}
+          {countdown && !urgent && <span className={s.metaSoon} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />{countdown}</span>}
         </div>
 
         <div className={s.row}>
@@ -99,16 +111,13 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen, index 
           {hasTip && (
             <>
               <span className={s.stripVal}>{myTip.h} : {myTip.a}</span>
-              {match.finished && points != null && (
-                <span className={`${s.stripPts} ${PTS_CLS[points]}`}>
-                  {PTS_LBL[points]} · {points} Pkt
-                </span>
-              )}
+              {match.finished && points != null && <PtsStrip points={points} />}
             </>
           )}
           {latePending && (
             <span className={s.lateBadge}>
-              ⏳ {myTip.h}:{myTip.a}
+              <IconHourglass size={12} />
+              {myTip.h}:{myTip.a}
               <span className={s.lateMuted}>– wartet auf Admin</span>
             </span>
           )}
@@ -121,7 +130,7 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen, index 
             className={`${s.action} ${locked ? s.actionLate : hasTip ? s.actionEdit : s.actionTip}`}
             onClick={(e) => { e.stopPropagation(); onOpen(); }}
           >
-            {locked ? "⚠ Verspätet tippen" : hasTip ? "Ändern" : "Jetzt tippen →"}
+            {locked ? <><IconWarning size={12} style={{ verticalAlign: "middle", marginRight: 4 }} />Verspätet tippen</> : hasTip ? "Ändern" : "Jetzt tippen →"}
           </button>
         )}
       </div>

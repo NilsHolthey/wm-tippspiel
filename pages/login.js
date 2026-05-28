@@ -29,7 +29,7 @@ export default function LoginPage() {
       <Head><title>Login – WM Tippspiel</title></Head>
       <div className={s.page}>
         <div className={s.card}>
-          <div className={s.icon}>🏆</div>
+          <div className={s.icon}><img src="/icons/Icon_logo.png" width={72} height={72} alt="" style={{ objectFit: "contain" }} /></div>
           <div className={s.title}>WM TIPPSPIEL</div>
           <div className={s.sub}>Melde dich an, um zu tippen</div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { IconWarning } from "./Icons";
 import s from "../styles/OfflineBanner.module.css";
 
 export default function OfflineBanner() {
@@ -20,7 +21,8 @@ export default function OfflineBanner() {
 
   return (
     <div className={s.banner}>
-      ⚠️ Kein Internet — Tipps können nicht gespeichert werden
+      <IconWarning size={14} style={{ verticalAlign: "middle", marginRight: 6 }} />
+      Kein Internet — Tipps können nicht gespeichert werden
     </div>
   );
 }

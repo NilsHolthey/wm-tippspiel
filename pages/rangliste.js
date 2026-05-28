@@ -4,10 +4,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import Nav from "../components/Nav";
+import { IconCheck, IconMinus, IconTrendUp } from "../components/Icons";
 import s from "../styles/Page.module.css";
 import { calcPoints } from "../lib/scoring";
-
-const MEDALS = ["🥇", "🥈", "🥉"];
 
 export default function RanglistePage({ board }) {
   const { data: session, status } = useSession();
@@ -25,7 +24,7 @@ export default function RanglistePage({ board }) {
         <Nav />
         <div className={s.wrap}>
           <div className={s.ph} style={{ marginBottom: 22 }}>
-            <div className={s.ptitle}>🏆 <span>RANGLISTE</span></div>
+            <div className={s.ptitle}><span>RANGLISTE</span></div>
           </div>
 
           <div className={s.tableWrap}>
@@ -35,9 +34,9 @@ export default function RanglistePage({ board }) {
                   <th className={s.th}>#</th>
                   <th className={s.th}>Spieler</th>
                   <th className={`${s.th} ${s.thC}`}>Punkte</th>
-                  <th className={`${s.th} ${s.thC}`}>✅</th>
-                  <th className={`${s.th} ${s.thC}`}>〰</th>
-                  <th className={`${s.th} ${s.thC}`}>↗</th>
+                  <th className={`${s.th} ${s.thC}`}><IconCheck size={13} style={{ verticalAlign: "middle", color: "var(--green)" }} /></th>
+                  <th className={`${s.th} ${s.thC}`}><IconMinus size={13} style={{ verticalAlign: "middle", color: "var(--gold)" }} /></th>
+                  <th className={`${s.th} ${s.thC}`}><IconTrendUp size={13} style={{ verticalAlign: "middle", color: "var(--yellow)" }} /></th>
                   <th className={`${s.th} ${s.thC}`}>Tipps</th>
                 </tr>
               </thead>
@@ -50,7 +49,7 @@ export default function RanglistePage({ board }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.24, ease: "easeOut", delay: i * 0.04 }}
                   >
-                    <td className={s.td}><span className={s.tRank}>{i < 3 ? MEDALS[i] : i + 1}</span></td>
+                    <td className={s.td}><span className={s.tRank}>{i + 1}</span></td>
                     <td className={s.td}>
                       <span className={s.tName}>{p.name}</span>
                       {p.id === currentUserId && <span className={s.tYou}> (Du)</span>}
