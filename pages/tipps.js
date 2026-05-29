@@ -13,19 +13,14 @@ import s from "../styles/Page.module.css";
 import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
 import { haptic } from "../utils/haptic";
 
-const LOCK_MIN = 60;
 const KO_LABELS  = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
 const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
-
-function isDeadlinePast(kickoff) {
-  return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
-}
 
 const fetcher = (url) => fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json(); });
 
 export default function TippsPage({ initialData }) {
   const router = useRouter();
-  const { data, mutate } = useSWR("/api/tipps/data", fetcher, {
+  const { data } = useSWR("/api/tipps/data", fetcher, {
     fallbackData: initialData ?? undefined,
     revalidateOnFocus: true,
     dedupingInterval: 30000,
@@ -232,7 +227,7 @@ export default function TippsPage({ initialData }) {
                 dragConstraints={false}
                 dragDirectionLock
                 dragMomentum={false}
-                style={{ x }}
+                style={{ x, touchAction: "pan-y" }}
                 onDragEnd={handleDragEnd}
               >
                 <div key={selected}>

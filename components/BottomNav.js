@@ -96,6 +96,11 @@ export default function BottomNav() {
             key={href}
             data-href={href}
             className={`${s.item}${active ? " " + s.active : ""}${isPreviewing ? " " + s.previewing : ""}`}
+            onClick={() => {
+              const isCurrentPage = href === "/" ? router.pathname === "/" : router.pathname.startsWith(href);
+              if (isCurrentPage) window.scrollTo({ top: 0, behavior: "smooth" });
+              else router.push(href);
+            }}
           >
             <Icon />
             <span className={s.label}>{label}</span>

@@ -8,6 +8,7 @@ import { shortName } from "../lib/teamNames";
 import { calcStandings } from "../lib/standings";
 import Nav from "../components/Nav";
 import MatchSheet from "../components/MatchSheet";
+import KOBracket from "../components/KOBracket";
 import s from "../styles/Page.module.css";
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
@@ -92,7 +93,7 @@ function MatchList({ matches, onOpen, myTipsMap }) {
   );
 }
 
-export default function GruppenPage({ groups, standings }) {
+export default function GruppenPage({ groups, standings, koMatches }) {
   const { status } = useSession();
   const router = useRouter();
   useEffect(() => {
@@ -109,23 +110,30 @@ export default function GruppenPage({ groups, standings }) {
   const otherTipsMap = tipsData?.otherTipsMap ?? {};
 
   const [sheetId, setSheetId] = useState(null);
+  const [view, setView] = useState("groups");
 
   if (status === "loading" || status === "unauthenticated") return null;
   const sheetMatch = sheetId ? tipsMatches.find(m => m._id === sheetId) : null;
 
-  const allMatchdays = [...new Set(tipsMatches.map(m => m.matchday))].sort((a, b) => a - b);
-  const dayMatches = sheetMatch
-    ? tipsMatches.filter(m => m.matchday === sheetMatch.matchday).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))
+  // for KO matches opened via KOBracket, look them up from koMatches too
+  const allKnownMatches = [...tipsMatches, ...(koMatches ?? [])];
+  const sheetMatchResolved = sheetId
+    ? (tipsMatches.find(m => m._id === sheetId) ?? koMatches?.find(m => m._id === sheetId) ?? null)
+    : null;
+
+  const allMatchdays = [...new Set(allKnownMatches.map(m => m.matchday))].sort((a, b) => a - b);
+  const dayMatches = sheetMatchResolved
+    ? allKnownMatches.filter(m => m.matchday === sheetMatchResolved.matchday).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))
     : [];
   const sheetIdx = dayMatches.findIndex(m => m._id === sheetId);
   const prevId = sheetIdx > 0 ? dayMatches[sheetIdx - 1]._id : null;
   const nextId = sheetIdx < dayMatches.length - 1 ? dayMatches[sheetIdx + 1]._id : null;
-  const sheetDayIdx = sheetMatch ? allMatchdays.indexOf(sheetMatch.matchday) : -1;
+  const sheetDayIdx = sheetMatchResolved ? allMatchdays.indexOf(sheetMatchResolved.matchday) : -1;
   const prevDayId = sheetDayIdx > 0
-    ? tipsMatches.filter(m => m.matchday === allMatchdays[sheetDayIdx - 1]).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0]?._id ?? null
+    ? allKnownMatches.filter(m => m.matchday === allMatchdays[sheetDayIdx - 1]).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0]?._id ?? null
     : null;
   const nextDayId = sheetDayIdx >= 0 && sheetDayIdx < allMatchdays.length - 1
-    ? tipsMatches.filter(m => m.matchday === allMatchdays[sheetDayIdx + 1]).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0]?._id ?? null
+    ? allKnownMatches.filter(m => m.matchday === allMatchdays[sheetDayIdx + 1]).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))[0]?._id ?? null
     : null;
 
   function handleTipSaved(matchId, tip) {
@@ -138,35 +146,59 @@ export default function GruppenPage({ groups, standings }) {
       <div className={s.app}>
         <Nav />
         <div className={s.wrap}>
-          <div className={s.ph} style={{ marginBottom: 22 }}>
+          <div className={s.ph} style={{ marginBottom: 18 }}>
             <div className={s.ptitle}><span>GRUPPEN</span></div>
           </div>
 
-          <div className={s.grpGrid}>
-            {GROUPS.filter(g => groups[g]).map((g, i) => (
-              <motion.div
-                key={g}
-                className={s.grpCard}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, ease: "easeOut", delay: i * 0.05 }}
-              >
-                <div className={s.grpCardTitle}>Gruppe {g}</div>
-                <StandingsTable rows={standings[g] ?? []} />
-                <MatchList matches={groups[g]} onOpen={setSheetId} myTipsMap={myTipsMap} />
-              </motion.div>
-            ))}
+          {/* view toggle */}
+          <div className={s.mdNav} style={{ marginBottom: 22 }}>
+            <button
+              className={`${s.mdPill}${view === "groups" ? " " + s.mdPillActive : ""}`}
+              onClick={() => setView("groups")}
+            >
+              Gruppen
+            </button>
+            <button
+              className={`${s.mdPill}${view === "ko" ? " " + s.mdPillActive : ""}`}
+              onClick={() => setView("ko")}
+            >
+              KO-Runde
+            </button>
           </div>
+
+          {view === "groups" ? (
+            <div className={s.grpGrid}>
+              {GROUPS.filter(g => groups[g]).map((g, i) => (
+                <motion.div
+                  key={g}
+                  className={s.grpCard}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease: "easeOut", delay: i * 0.05 }}
+                >
+                  <div className={s.grpCardTitle}>Gruppe {g}</div>
+                  <StandingsTable rows={standings[g] ?? []} />
+                  <MatchList matches={groups[g]} onOpen={setSheetId} myTipsMap={myTipsMap} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <KOBracket
+              matches={koMatches ?? []}
+              myTipsMap={myTipsMap}
+              onOpen={setSheetId}
+            />
+          )}
         </div>
       </div>
 
       <AnimatePresence>
-        {sheetMatch && (
+        {sheetMatchResolved && (
           <MatchSheet
-            match={sheetMatch}
+            match={sheetMatchResolved}
             myTip={myTipsMap[sheetId] ?? null}
             otherTips={otherTipsMap[sheetId] ?? []}
-            groupMatches={sheetMatch?.group ? tipsMatches.filter(m => m.group === sheetMatch.group) : []}
+            groupMatches={sheetMatchResolved?.group ? allKnownMatches.filter(m => m.group === sheetMatchResolved.group) : []}
             prevId={prevId}
             nextId={nextId}
             prevDayId={prevDayId}
@@ -188,7 +220,10 @@ export async function getStaticProps() {
 
     await connectDB();
 
-    const rawMatches = await Match.find({ group: { $ne: null } }).sort({ kickoff: 1 }).lean();
+    const [rawMatches, rawKO] = await Promise.all([
+      Match.find({ group: { $ne: null } }).sort({ kickoff: 1 }).lean(),
+      Match.find({ group: null, matchday: { $gt: 17 } }).sort({ kickoff: 1 }).lean(),
+    ]);
 
     const groups = {};
     for (const m of rawMatches) {
@@ -208,8 +243,20 @@ export async function getStaticProps() {
       rawMatches.map(m => ({ ...m, _id: m._id.toString(), kickoff: m.kickoff.toISOString() }))
     );
 
-    return { props: { groups, standings }, revalidate: 60 };
+    const koMatches = rawKO.map(m => ({
+      _id: m._id.toString(),
+      matchday: m.matchday,
+      home: m.home, homeFlag: m.homeFlag ?? "",
+      away: m.away, awayFlag: m.awayFlag ?? "",
+      kickoff: m.kickoff.toISOString(),
+      finished: m.finished,
+      result: m.result ?? null,
+      group: null,
+      phase: m.phase ?? "",
+    }));
+
+    return { props: { groups, standings, koMatches }, revalidate: 60 };
   } catch (e) {
-    return { props: { groups: {}, standings: {} }, revalidate: 30 };
+    return { props: { groups: {}, standings: {}, koMatches: [] }, revalidate: 30 };
   }
 }

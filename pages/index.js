@@ -94,7 +94,6 @@ function RecentResults({ results, myTipsMap }) {
       {results.map(m => {
         const tip = myTipsMap[m._id];
         const pts = tip ? calcPoints({ h: tip.h, a: tip.a }, m.result) : null;
-        const label = m.group ? `Gruppe ${m.group}` : m.phase;
         return (
           <div key={m._id} className={s.rRow}>
             <div className={s.rLeft}>
@@ -148,6 +147,21 @@ function MiniLeaderboard({ board, currentUserId }) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function FullLeaderboard({ board, currentUserId }) {
+  return (
+    <div className={s.miniBoard}>
+      {board.map((p, i) => (
+        <div key={p.id} className={`${s.mbRow}${p.id === currentUserId ? " " + s.mbRowMe : ""}`}>
+          <span className={s.mbRank}>{i + 1}</span>
+          <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
+          <span className={s.mbPts}>{p.pts}</span>
+          <span className={s.mbStat}>{p.correct}✓</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -222,12 +236,16 @@ function Rules() {
           <span className={s.ruleExtraIcon}>⚠️</span>
           <span>Verspätete Tipps können per Anfrage eingereicht werden – ein Admin muss sie genehmigen.</span>
         </div>
+        <div className={s.ruleExtraRow}>
+          <span className={s.ruleExtraIcon}>⏱️</span>
+          <span>Alle Tipps gelten für das Ergebnis nach <strong>90 Minuten</strong> – Verlängerung und Elfmeterschießen zählen nicht.</span>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId, groupStandings, activeGroups }) {
+export default function HomePage({ nextMatches, recentResults, board, myTipsMap, currentUserId, groupStandings, activeGroups, todayUntipped }) {
   const router = useRouter();
   return (
     <>
@@ -235,6 +253,13 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
       <div className={s.app}>
         <Nav />
         <div className={s.wrap}>
+
+          {todayUntipped > 0 && (
+            <Link href="/tipps" className={s.untippedBanner}>
+              <span>⚽ {todayUntipped} {todayUntipped === 1 ? "Spiel" : "Spiele"} heute noch ohne Tipp</span>
+              <span className={s.untippedCta}>Jetzt tippen →</span>
+            </Link>
+          )}
 
           <div className={s.homeHero}>
             <div className={s.homeTitle}>WM <span>TIPPSPIEL</span> 2026</div>
@@ -267,7 +292,8 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
                 <IconTrophy size={14} /> Rangliste
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
-              <MiniLeaderboard board={board} currentUserId={currentUserId} />
+              <div className={s.mobileOnly}><MiniLeaderboard board={board} currentUserId={currentUserId} /></div>
+              <div className={s.tabletUp}><FullLeaderboard board={board} currentUserId={currentUserId} /></div>
             </motion.div>
           </div>
 
@@ -313,17 +339,22 @@ export async function getServerSideProps(context) {
   await connectDB();
   const userId = session.user.id;
 
-  const [rawNext, rawRecent, users, allFinished, allTips, rawGroupMatches] = await Promise.all([
+  const now = new Date();
+  const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
+  const todayEnd   = new Date(now); todayEnd.setHours(23, 59, 59, 999);
+
+  const [rawNext, rawRecent, users, allFinished, allTips, rawGroupMatches, rawToday] = await Promise.all([
     Match.find({ finished: false }).sort({ kickoff: 1 }).limit(4).lean(),
     Match.find({ finished: true  }).sort({ kickoff: -1 }).limit(5).lean(),
     User.find().lean(),
     Match.find({ finished: true }).lean(),
     Tip.find({ lateStatus: { $in: [null, "approved"] } }).lean(),
     Match.find({ group: { $ne: null } }).sort({ kickoff: 1 }).lean(),
+    Match.find({ finished: false, kickoff: { $gte: todayStart, $lte: todayEnd } }).lean(),
   ]);
 
-  // tips map for the current user (next + recent matches)
-  const relevantIds = new Set([...rawNext, ...rawRecent].map(m => m._id.toString()));
+  // tips map for the current user (next + recent + today matches)
+  const relevantIds = new Set([...rawNext, ...rawRecent, ...rawToday].map(m => m._id.toString()));
   const myTipsMap = {};
   const tipMap = {};
   for (const t of allTips) {
@@ -370,7 +401,6 @@ export async function getServerSideProps(context) {
   })));
 
   // groups with matches yesterday, today or tomorrow
-  const now = new Date();
   const dayStart = (d) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
   const yesterday = dayStart(new Date(now - 86400000));
   const tomorrow  = dayStart(new Date(now.getTime() + 86400000));
@@ -382,9 +412,26 @@ export async function getServerSideProps(context) {
   );
   // fallback: first 6 groups that have standings data
   const allStandingGroups = ["A","B","C","D","E","F","G","H","I","J","K","L"].filter(g => groupStandings[g]);
-  const activeGroups = activeGroupSet.size > 0
+  // sort groups by soonest upcoming unfinished match so the most relevant appear first on mobile
+  const groupNextKickoff = {};
+  for (const m of rawGroupMatches) {
+    if (!m.finished && m.group) {
+      const t = new Date(m.kickoff).getTime();
+      if (!groupNextKickoff[m.group] || t < groupNextKickoff[m.group]) groupNextKickoff[m.group] = t;
+    }
+  }
+  const byNextMatch = (a, b) => (groupNextKickoff[a] ?? Infinity) - (groupNextKickoff[b] ?? Infinity);
+
+  const activeGroups = (activeGroupSet.size > 0
     ? allStandingGroups.filter(g => activeGroupSet.has(g))
-    : allStandingGroups.slice(0, 6);
+    : allStandingGroups
+  ).sort(byNextMatch);
+
+  const LOCK_MIN = 60;
+  const todayUntipped = rawToday.filter(m => {
+    const deadline = new Date(m.kickoff).getTime() - LOCK_MIN * 60 * 1000;
+    return deadline > now.getTime() && !myTipsMap[m._id.toString()];
+  }).length;
 
   return {
     props: {
@@ -395,6 +442,7 @@ export async function getServerSideProps(context) {
       currentUserId: userId,
       groupStandings,
       activeGroups,
+      todayUntipped,
     },
   };
 }
