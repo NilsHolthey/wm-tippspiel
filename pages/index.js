@@ -152,6 +152,21 @@ function MiniLeaderboard({ board, currentUserId }) {
   );
 }
 
+function FullLeaderboard({ board, currentUserId }) {
+  return (
+    <div className={s.miniBoard}>
+      {board.map((p, i) => (
+        <div key={p.id} className={`${s.mbRow}${p.id === currentUserId ? " " + s.mbRowMe : ""}`}>
+          <span className={s.mbRank}>{i + 1}</span>
+          <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
+          <span className={s.mbPts}>{p.pts}</span>
+          <span className={s.mbStat}>{p.correct}✓</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function GroupsPreview({ standings, activeGroups }) {
   return (
     <div className={s.homeSec}>
@@ -222,6 +237,10 @@ function Rules() {
           <span className={s.ruleExtraIcon}>⚠️</span>
           <span>Verspätete Tipps können per Anfrage eingereicht werden – ein Admin muss sie genehmigen.</span>
         </div>
+        <div className={s.ruleExtraRow}>
+          <span className={s.ruleExtraIcon}>⏱️</span>
+          <span>Alle Tipps gelten für das Ergebnis nach <strong>90 Minuten</strong> – Verlängerung und Elfmeterschießen zählen nicht.</span>
+        </div>
       </div>
     </div>
   );
@@ -267,7 +286,8 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
                 <IconTrophy size={14} /> Rangliste
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
-              <MiniLeaderboard board={board} currentUserId={currentUserId} />
+              <div className={s.mobileOnly}><MiniLeaderboard board={board} currentUserId={currentUserId} /></div>
+              <div className={s.tabletUp}><FullLeaderboard board={board} currentUserId={currentUserId} /></div>
             </motion.div>
           </div>
 
@@ -384,7 +404,7 @@ export async function getServerSideProps(context) {
   const allStandingGroups = ["A","B","C","D","E","F","G","H","I","J","K","L"].filter(g => groupStandings[g]);
   const activeGroups = activeGroupSet.size > 0
     ? allStandingGroups.filter(g => activeGroupSet.has(g))
-    : allStandingGroups.slice(0, 6);
+    : allStandingGroups;
 
   return {
     props: {

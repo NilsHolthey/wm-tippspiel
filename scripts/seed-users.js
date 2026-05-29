@@ -26,7 +26,6 @@ const USERS = [
   { username: "Kim",      password: "kim2026",      isAdmin: false },
   { username: "Collin",   password: "collin2026",   isAdmin: false },
   { username: "Linn",     password: "linn2026",     isAdmin: false },
-  { username: "Flo",      password: "flo2026",      isAdmin: false },
   { username: "Svend",    password: "svend2026",    isAdmin: false },
   { username: "Gisela",   password: "gisela2026",   isAdmin: false },
 ];

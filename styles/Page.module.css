@@ -291,7 +291,7 @@
   grid-template-columns: 1fr 260px;
   gap: 16px;
   margin-bottom: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 @media (max-width: 640px) {
   .homeGrid { grid-template-columns: 1fr; }
@@ -879,4 +879,26 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   pointer-events: none;
+}
+
+/* ── responsive leaderboard / groups (tablet = 768px+) ─────────────────── */
+.mbStat { font-size: 0.68rem; color: var(--muted); width: 28px; text-align: right; flex-shrink: 0; }
+
+.mobileOnly { display: block; }
+.tabletUp   { display: none; }
+
+@media (min-width: 768px) {
+  .mobileOnly { display: none; }
+  .tabletUp   { display: block; }
+
+  /* show up to 10 groups on tablet, hide the rest */
+  .miniGrpCard:nth-child(n+11) { display: none; }
+
+  /* wider right column for full leaderboard */
+  .homeGrid { grid-template-columns: 1fr 300px; }
+}
+
+@media (max-width: 767px) {
+  /* cap groups at 6 on mobile */
+  .miniGrpCard:nth-child(n+7) { display: none; }
 }
