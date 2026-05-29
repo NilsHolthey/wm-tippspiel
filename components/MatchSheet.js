@@ -4,6 +4,7 @@ import Stepper from "./MatchCard/Stepper";
 import { calcPoints } from "../lib/scoring";
 import { calcStandings } from "../lib/standings";
 import { IconWarning, IconCheck } from "./Icons";
+import { celebrate } from "../utils/confetti";
 import s from "./MatchSheet.module.css";
 
 const LOCK_MIN = 60;
@@ -37,6 +38,10 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
     setDone(false);
     setSaving(false);
     setShowTable(false);
+    if (match.finished && myTipProp && myTipProp.lateStatus !== "pending") {
+      const pts = calcPoints({ h: myTipProp.h, a: myTipProp.a }, match.result);
+      if (pts === 3) celebrate(match._id);
+    }
   }, [match._id]);
 
   // lock body scroll while open

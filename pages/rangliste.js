@@ -2,23 +2,27 @@ import Head from "next/head";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Nav from "../components/Nav";
 import PointsChart from "../components/PointsChart";
-import { IconCheck, IconMinus, IconTrendUp } from "../components/Icons";
 import s from "../styles/Page.module.css";
 import { calcPoints } from "../lib/scoring";
+
+const RANK_COLORS = { 1: "#ceac4d", 2: "#9ba4ae", 3: "#b07040" };
 
 export default function RanglistePage({ board, matchdays }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const currentUserId = session?.user?.id;
   const [showChart, setShowChart] = useState(false);
+  const [expanded, setExpanded] = useState(new Set());
 
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login");
   }, [status, router]);
   if (status === "loading" || status === "unauthenticated") return null;
+
+  const maxPts = board[0]?.pts || 1;
 
   return (
     <>
@@ -28,7 +32,7 @@ export default function RanglistePage({ board, matchdays }) {
         <div className={s.wrap}>
           <div className={s.ph} style={{ marginBottom: 22 }}>
             <div className={s.ptitle}><span>RANGLISTE</span></div>
-            {matchdays && matchdays.length >= 2 && (
+            {matchdays?.length >= 2 && (
               <button
                 onClick={() => setShowChart(v => !v)}
                 className={`${s.mdPill}${showChart ? " " + s.mdPillActive : ""}`}
@@ -46,56 +50,77 @@ export default function RanglistePage({ board, matchdays }) {
             </div>
           )}
 
-          <div className={s.tableWrap}>
-            <table className={s.table}>
-              <thead>
-                <tr>
-                  <th className={s.th}>#</th>
-                  <th className={s.th}>Spieler</th>
-                  <th className={`${s.th} ${s.thC}`}>Punkte</th>
-                  <th className={`${s.th} ${s.thC}`}><IconCheck size={13} style={{ verticalAlign: "middle", color: "var(--green)" }} /></th>
-                  <th className={`${s.th} ${s.thC}`}><IconMinus size={13} style={{ verticalAlign: "middle", color: "var(--gold)" }} /></th>
-                  <th className={`${s.th} ${s.thC}`}><IconTrendUp size={13} style={{ verticalAlign: "middle", color: "var(--yellow)" }} /></th>
-                  <th className={`${s.th} ${s.thC}`}>Tipps</th>
-                </tr>
-              </thead>
-              <tbody>
-                {board.map((p, i) => (
-                  <motion.tr
-                    key={p.id}
-                    className={`${s.tr}${p.id === currentUserId ? " " + s.trMe : ""}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.24, ease: "easeOut", delay: i * 0.04 }}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => router.push(p.id === currentUserId ? "/stats" : `/stats?user=${p.id}`)}
+          <div className={s.lbList}>
+            {board.map((p, i) => {
+              const isMe = p.id === currentUserId;
+              const isOpen = expanded.has(p.id);
+              const rankColor = RANK_COLORS[i + 1] ?? "var(--muted)";
+              const pct = (p.pts / maxPts) * 100;
+              return (
+                <motion.div
+                  key={p.id}
+                  className={`${s.lbCard}${isMe ? " " + s.lbRowMe : ""}${isOpen ? " " + s.lbCardOpen : ""}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22, ease: "easeOut", delay: i * 0.05 }}
+                >
+                  <div
+                    className={s.lbRow}
+                    onClick={() => setExpanded(prev => {
+                      const next = new Set(prev);
+                      isOpen ? next.delete(p.id) : next.add(p.id);
+                      return next;
+                    })}
                   >
-                    <td className={s.td}><span className={s.tRank}>{i + 1}</span></td>
-                    <td className={s.td}>
-                      <span className={s.tName}>{p.name}</span>
-                      {p.id === currentUserId && <span className={s.tYou}> (Du)</span>}
-                    </td>
-                    <td className={s.tdC}><span className={s.tPts}>{p.pts}</span></td>
-                    <td className={s.tdC}><span className={s.tG}>{p.correct}</span></td>
-                    <td className={s.tdC}><span className={s.tS}>{p.diff}</span></td>
-                    <td className={s.tdC}><span className={s.tS}>{p.tendency}</span></td>
-                    <td className={s.tdC}><span className={s.tS}>{p.tipped}</span></td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    <span className={s.lbRank} style={{ color: rankColor }}>{i + 1}</span>
+                    <div className={s.lbInfo}>
+                      <div className={s.lbName}>
+                        {p.name}
+                        {isMe && <span className={s.lbYou}>Du</span>}
+                      </div>
+                      <div className={s.lbBar}>
+                        <div
+                          className={s.lbBarFill}
+                          style={{
+                            width: `${pct}%`,
+                            background: i === 0
+                              ? "linear-gradient(90deg, var(--gold-dk), var(--gold))"
+                              : "rgba(255,255,255,0.18)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <span className={s.lbPts} style={{ color: rankColor }}>{p.pts}</span>
+                    <svg
+                      width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ color: "var(--muted)", flexShrink: 0, transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "none" }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </div>
 
-          <div style={{ display: "flex", gap: 14, marginTop: 18, flexWrap: "wrap" }}>
-            {[
-              ["pts3", "3 Pkt", "Richtiges Ergebnis"],
-              ["pts2", "2 Pkt", "Richtige Differenz"],
-              ["pts1", "1 Pkt", "Richtige Tendenz"],
-            ].map(([cls, label, desc]) => (
-              <div key={cls} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.78rem", color: "var(--muted)" }}>
-                <span className={`${s.legendChip} ${s[cls]}`}>{label}</span>{desc}
-              </div>
-            ))}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div className={s.lbDetail}>
+                          <span className={`${s.legendChip} ${s.pts3}`}>{p.correct} × 3 Pkt</span>
+                          <span className={`${s.legendChip} ${s.pts2}`}>{p.diff} × 2 Pkt</span>
+                          <span className={`${s.legendChip} ${s.pts1}`}>{p.tendency} × 1 Pkt</span>
+                          <span style={{ fontSize: "0.72rem", color: "var(--muted)", marginLeft: 4 }}>{p.tipped} Tipps</span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -119,23 +144,19 @@ export async function getStaticProps() {
     const tipMap = {};
     for (const t of tips) tipMap[`${t.user}-${t.match}`] = t;
 
-    // collect sorted matchdays
     const matchdaySet = new Set(finishedMatches.map(m => m.matchday));
     const matchdays = [...matchdaySet].sort((a, b) => a - b);
 
-    const board = users.map((u) => {
+    const board = users.map(u => {
       let pts = 0, correct = 0, diff = 0, tendency = 0, tipped = 0;
       const history = matchdays.map(day => {
-        const dayMatches = finishedMatches.filter(m => m.matchday === day);
         let dayPts = 0;
-        for (const m of dayMatches) {
+        for (const m of finishedMatches.filter(m => m.matchday === day)) {
           const tip = tipMap[`${u._id}-${m._id}`];
-          if (!tip) continue;
-          dayPts += calcPoints({ h: tip.h, a: tip.a }, m.result) ?? 0;
+          if (tip) dayPts += calcPoints({ h: tip.h, a: tip.a }, m.result) ?? 0;
         }
         return dayPts;
       });
-
       for (const m of finishedMatches) {
         const tip = tipMap[`${u._id}-${m._id}`];
         if (!tip) continue;
