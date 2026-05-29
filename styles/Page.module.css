@@ -247,7 +247,8 @@
 }
 .btnNo:hover { background: rgba(239,68,68,0.16); }
 
-.arow { background: var(--d3); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 10px 14px; margin-bottom: 7px; }
+.arow { background: var(--d3); border: none; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+.arow:last-child { border-bottom: none; }
 .arowDone { border-left: 2px solid rgba(34,197,94,0.5); }
 .arowMatch { font-size: 0.88rem; }
 .arowEntry { display: flex; align-items: center; gap: 8px; }
