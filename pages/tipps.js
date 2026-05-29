@@ -57,15 +57,16 @@ export default function TippsPage({ initialData }) {
   }, [selected]);
 
   async function handleDragEnd(_, info) {
-    const THRESHOLD = 60;
-    if (info.offset.x < -THRESHOLD && nextDay) {
+    const swipeNext = info.offset.x < -40 || info.velocity.x < -300;
+    const swipePrev = info.offset.x >  40 || info.velocity.x >  300;
+    if (swipeNext && nextDay) {
       haptic(8);
       slideDir.current = 1;
       await animate(x, -600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
       x.set(600);
       flushSync(() => setSelected(nextDay));
       animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
-    } else if (info.offset.x > THRESHOLD && prevDay) {
+    } else if (swipePrev && prevDay) {
       haptic(8);
       slideDir.current = -1;
       await animate(x, 600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
