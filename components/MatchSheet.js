@@ -108,17 +108,19 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
     swipeRef.current = { x: null, y: null };
 
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (dx < 0 && nextId) {
+      const goNext = nextId ?? nextDayId;
+      const goPrev = prevId ?? prevDayId;
+      if (dx < 0 && goNext) {
         await animate(x, -600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
         x.set(600);
-        flushSync(() => onNavigate(nextId));
+        flushSync(() => onNavigate(goNext));
         animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
         return;
       }
-      if (dx > 0 && prevId) {
+      if (dx > 0 && goPrev) {
         await animate(x, 600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
         x.set(-600);
-        flushSync(() => onNavigate(prevId));
+        flushSync(() => onNavigate(goPrev));
         animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
         return;
       }
@@ -189,8 +191,8 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
         </div>
 
         <motion.div className={s.mpTeams} style={{ x }}>
-          {prevId && <span className={s.swipeHintL}>‹</span>}
-          {nextId && <span className={s.swipeHintR}>›</span>}
+          {(prevId || prevDayId) && <span className={s.swipeHintL}>‹</span>}
+          {(nextId || nextDayId) && <span className={s.swipeHintR}>›</span>}
           <div className={s.mpCardDate}>{dateStr}</div>
           <div className={s.mpTeamsRow}>
           <div className={s.mpTeamCol}>
@@ -276,12 +278,11 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
         </AnimatePresence>
 
         <div className={s.navSection}>
-          <div className={s.navLabel}>Spiel</div>
           <div className={s.matchNav}>
-            <button className={s.matchNavBtn} onClick={() => onNavigate(prevId)} disabled={!prevId}>
+            <button className={s.matchNavBtn} onClick={() => onNavigate(prevId ?? prevDayId)} disabled={!prevId && !prevDayId}>
               ← Vorheriges
             </button>
-            <button className={s.matchNavBtn} onClick={() => onNavigate(nextId)} disabled={!nextId}>
+            <button className={s.matchNavBtn} onClick={() => onNavigate(nextId ?? nextDayId)} disabled={!nextId && !nextDayId}>
               Nächstes →
             </button>
           </div>
@@ -337,21 +338,6 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
           </div>
         )}
 
-        <div className={s.navSection}>
-          <div className={s.navLabel}>Spieltag</div>
-          <div className={s.dayNav}>
-            <button className={s.dayNavBtn} onClick={() => onNavigate(prevDayId)} disabled={!prevDayId}>
-              ← Vorheriger
-            </button>
-            <button
-              className={`${s.dayNavBtn}${!nextId && nextDayId ? " " + s.dayNavBtnHighlight : ""}`}
-              onClick={() => onNavigate(nextDayId)}
-              disabled={!nextDayId}
-            >
-              Nächster →
-            </button>
-          </div>
-        </div>
       </div>
     </motion.div>
 

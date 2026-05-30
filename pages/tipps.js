@@ -105,6 +105,10 @@ export default function TippsPage({ initialData }) {
   }
 
   function closeSheet() {
+    if (sheetMatch) {
+      slideDir.current = 0;
+      setSelected(sheetMatch.matchday);
+    }
     setSheetId(null);
     router.push("/tipps", undefined, { shallow: true });
   }
