@@ -38,7 +38,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
 
   return (
     <SessionProvider session={session}>
-      {loading && <LoadingScreen />}
+      {/* {loading && <LoadingScreen />} */}
       <OfflineBanner />
       {showChrome && (
         <div style={{

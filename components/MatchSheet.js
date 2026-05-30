@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
-import { motion, useDragControls, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { motion, useDragControls, AnimatePresence, useMotionValue, animate } from "framer-motion";
+import { flushSync } from "react-dom";
 import Stepper from "./MatchCard/Stepper";
 import { calcPoints } from "../lib/scoring";
 import { calcStandings } from "../lib/standings";
@@ -24,6 +25,8 @@ const TableIcon = () => (
 
 export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], groupMatches = [], prevId, nextId, prevDayId, nextDayId, onClose, onNavigate, onTipSaved }) {
   const dragControls = useDragControls();
+  const x = useMotionValue(0);
+  const swipeRef = useRef({ x: null, y: null });
   const [h, setH] = useState(myTipProp?.h ?? 0);
   const [a, setA] = useState(myTipProp?.a ?? 0);
   const [myTip, setMyTip] = useState(myTipProp);
@@ -32,6 +35,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
   const [showTable, setShowTable] = useState(false);
 
   useEffect(() => {
+    x.set(0);
     setH(myTipProp?.h ?? 0);
     setA(myTipProp?.a ?? 0);
     setMyTip(myTipProp);
@@ -86,12 +90,57 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
     }
   }
 
+  function handleSwipeStart(e) {
+    swipeRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+
+  function handleSwipeMove(e) {
+    if (swipeRef.current.x === null) return;
+    const dx = e.touches[0].clientX - swipeRef.current.x;
+    const dy = e.touches[0].clientY - swipeRef.current.y;
+    if (Math.abs(dx) > Math.abs(dy)) x.set(dx * 0.25);
+  }
+
+  async function handleSwipeEnd(e) {
+    if (swipeRef.current.x === null) return;
+    const dx = e.changedTouches[0].clientX - swipeRef.current.x;
+    const dy = e.changedTouches[0].clientY - swipeRef.current.y;
+    swipeRef.current = { x: null, y: null };
+
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && nextId) {
+        await animate(x, -600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
+        x.set(600);
+        flushSync(() => onNavigate(nextId));
+        animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
+        return;
+      }
+      if (dx > 0 && prevId) {
+        await animate(x, 600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
+        x.set(-600);
+        flushSync(() => onNavigate(prevId));
+        animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
+        return;
+      }
+    }
+    animate(x, 0, { type: "spring", stiffness: 500, damping: 35 });
+  }
+
   const kickoffDate = new Date(match.kickoff);
   const dateStr = kickoffDate.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })
     + " · " + kickoffDate.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
   const phaseLabel = KO_HEADERS[match.matchday] ?? `Spieltag ${match.matchday}`;
 
   return (
+    <>
+    <motion.div
+      className={s.backdrop}
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+    />
     <motion.div
       className={s.sheet}
       drag="y"
@@ -119,11 +168,15 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
         </div>
       </div>
 
-      <div className={s.content}>
+      <div
+        className={s.content}
+        onTouchStart={handleSwipeStart}
+        onTouchMove={handleSwipeMove}
+        onTouchEnd={handleSwipeEnd}
+      >
         <div className={s.mpMeta}>
           <span className={s.mpDay}>{phaseLabel}</span>
           {match.group && <span className={s.mpGroup}>Gruppe {match.group}</span>}
-          <span className={s.mpDate}>{dateStr}</span>
           {groupRows && (
             <button
               className={`${s.tableBtn}${showTable ? " " + s.tableBtnActive : ""}`}
@@ -135,7 +188,11 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
           )}
         </div>
 
-        <div className={s.mpTeams}>
+        <motion.div className={s.mpTeams} style={{ x }}>
+          {prevId && <span className={s.swipeHintL}>‹</span>}
+          {nextId && <span className={s.swipeHintR}>›</span>}
+          <div className={s.mpCardDate}>{dateStr}</div>
+          <div className={s.mpTeamsRow}>
           <div className={s.mpTeamCol}>
             <span className={s.mpFlag}>{match.homeFlag}</span>
             <span className={s.mpName}>{match.home}</span>
@@ -169,7 +226,8 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </motion.div>
 
         <AnimatePresence>
           {showTable && groupRows && (
@@ -285,12 +343,17 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
             <button className={s.dayNavBtn} onClick={() => onNavigate(prevDayId)} disabled={!prevDayId}>
               ← Vorheriger
             </button>
-            <button className={s.dayNavBtn} onClick={() => onNavigate(nextDayId)} disabled={!nextDayId}>
+            <button
+              className={`${s.dayNavBtn}${!nextId && nextDayId ? " " + s.dayNavBtnHighlight : ""}`}
+              onClick={() => onNavigate(nextDayId)}
+              disabled={!nextDayId}
+            >
               Nächster →
             </button>
           </div>
         </div>
       </div>
     </motion.div>
+    </>
   );
 }

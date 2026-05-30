@@ -20,7 +20,29 @@ export default function RanglistePage({ board, matchdays }) {
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login");
   }, [status, router]);
-  if (status === "loading" || status === "unauthenticated") return null;
+  if (status === "loading") return (
+    <div className={s.app}>
+      <Nav />
+      <div className={s.wrap}>
+        <div className={s.ph} style={{ marginBottom: 22 }}>
+          <div className={s.skeletonBlock} style={{ width: 140, height: 32, borderRadius: 6 }} />
+        </div>
+        <div className={s.lbList}>
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className={s.lbCard} style={{ padding: "13px 16px", display: "flex", alignItems: "center", gap: 14 }}>
+              <div className={s.skeletonBlock} style={{ width: 26, height: 22, borderRadius: 4 }} />
+              <div style={{ flex: 1 }}>
+                <div className={s.skeletonBlock} style={{ width: `${50 + Math.random() * 30}%`, height: 13, borderRadius: 4, marginBottom: 9 }} />
+                <div className={s.skeletonBlock} style={{ width: "70%", height: 3, borderRadius: 99 }} />
+              </div>
+              <div className={s.skeletonBlock} style={{ width: 38, height: 26, borderRadius: 4 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+  if (status === "unauthenticated") return null;
 
   const maxPts = board[0]?.pts || 1;
 
