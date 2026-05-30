@@ -45,7 +45,7 @@ function countdownStr(kickoff) {
   return `noch ${m}min`;
 }
 
-export default function MatchCard({ match, myTip, otherTips = [], onOpen, index = 0, dir = 0, isNewlyFinished = false }) {
+export default function MatchCard({ match, myTip, otherTips = [], tipStatus = null, onOpen, index = 0, dir = 0, isNewlyFinished = false }) {
   const [live, setLive] = useState(false);
   useEffect(() => {
     const ko = new Date(match.kickoff).getTime();
@@ -146,6 +146,14 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen, index 
           </button>
         )}
       </div>
+
+      {!tipsVisible && tipStatus && (
+        <div className={s.othersRow}>
+          {tipStatus.map((u, i) => (
+            <span key={i} className={u.hasTip ? s.statusTipped : s.statusMissing}>{u.name}</span>
+          ))}
+        </div>
+      )}
 
       {tipsVisible && othersWithPts.length > 0 && (
         <div className={s.othersRow}>

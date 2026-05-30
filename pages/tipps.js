@@ -12,19 +12,14 @@ import s from "../styles/Page.module.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { haptic } from "../utils/haptic";
 
-const LOCK_MIN = 60;
 const KO_LABELS  = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
 const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
-
-function isDeadlinePast(kickoff) {
-  return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
-}
 
 const fetcher = (url) => fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json(); });
 
 export default function TippsPage({ initialData }) {
   const router = useRouter();
-  const { data, mutate } = useSWR("/api/tipps/data", fetcher, {
+  const { data } = useSWR("/api/tipps/data", fetcher, {
     fallbackData: initialData ?? undefined,
     revalidateOnFocus: true,
     dedupingInterval: 30000,
@@ -34,6 +29,7 @@ export default function TippsPage({ initialData }) {
   const defaultMatchday = data?.defaultMatchday ?? 1;
   const [myTipsMap, setMyTipsMap] = useState(data?.myTipsMap ?? {});
   const otherTipsMap = data?.otherTipsMap ?? {};
+  const tipStatusMap = data?.tipStatusMap ?? {};
 
   // sync myTipsMap when SWR data refreshes
   useEffect(() => {
@@ -167,6 +163,7 @@ export default function TippsPage({ initialData }) {
         match={m}
         myTip={myTipsMap[m._id] ?? null}
         otherTips={otherTipsMap[m._id] ?? []}
+        tipStatus={tipStatusMap[m._id] ?? null}
         onOpen={() => openSheet(m._id)}
         index={i}
         dir={slideDir.current}
