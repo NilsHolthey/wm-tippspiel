@@ -159,7 +159,6 @@ function FullLeaderboard({ board, currentUserId }) {
           <span className={s.mbRank}>{i + 1}</span>
           <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
           <span className={s.mbPts}>{p.pts}</span>
-          <span className={s.mbStat}>{p.correct}✓</span>
         </div>
       ))}
     </div>
