@@ -136,6 +136,9 @@
 .actionLate:hover { background: rgba(234,179,8,0.08); }
 
 /* other tips row */
+.statusTipped { font-size: 0.7rem; font-weight: 600; color: var(--green); }
+.statusMissing { font-size: 0.7rem; font-weight: 600; color: #f87171; }
+
 .othersRow {
   background: var(--d3);
   border-top: 1px solid rgba(255,255,255,0.04);

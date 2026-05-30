@@ -29,8 +29,13 @@ export default async function handler(req, res) {
   await connectDB();
   const userId = session.user.id;
 
-  const rawMatches = await Match.find().sort({ kickoff: 1 }).lean();
-  const tips = await Tip.find().populate("user", "username").lean();
+  const { default: User } = await import("../../../models/User");
+
+  const [rawMatches, tips, allUsers] = await Promise.all([
+    Match.find().sort({ kickoff: 1 }).lean(),
+    Tip.find().populate("user", "username").lean(),
+    User.find().select("username").lean(),
+  ]);
 
   const teamForm = {};
   for (const m of rawMatches) {
@@ -45,9 +50,18 @@ export default async function handler(req, res) {
 
   const myTipsMap = {};
   const otherTipsMap = {};
+  const tippedPerMatch = {}; // matchId -> Set of usernames who tipped
+
   for (const tip of tips) {
     if (!tip.user) continue;
     const mId = tip.match.toString();
+    const name = tip.user.username;
+
+    if (!tippedPerMatch[mId]) tippedPerMatch[mId] = new Set();
+    if (tip.lateStatus === null || tip.lateStatus === "approved") {
+      tippedPerMatch[mId].add(name);
+    }
+
     if (tip.user._id.toString() === userId) {
       myTipsMap[mId] = { h: tip.h, a: tip.a, lateStatus: tip.lateStatus };
     } else {
@@ -55,9 +69,19 @@ export default async function handler(req, res) {
       if (!match) continue;
       if (isDeadlinePast(match.kickoff) && (tip.lateStatus === null || tip.lateStatus === "approved")) {
         if (!otherTipsMap[mId]) otherTipsMap[mId] = [];
-        otherTipsMap[mId].push({ name: tip.user.username, h: tip.h, a: tip.a });
+        otherTipsMap[mId].push({ name, h: tip.h, a: tip.a });
       }
     }
+  }
+
+  // Pre-deadline tip status: green/red per user per match (no scores)
+  const allUsernames = allUsers.map(u => u.username);
+  const tipStatusMap = {};
+  for (const m of rawMatches) {
+    if (m.finished || isDeadlinePast(m.kickoff)) continue;
+    const mId = m._id.toString();
+    const tipped = tippedPerMatch[mId] ?? new Set();
+    tipStatusMap[mId] = allUsernames.map(name => ({ name, hasTip: tipped.has(name) }));
   }
 
   const matches = rawMatches.map(m => ({
@@ -77,5 +101,5 @@ export default async function handler(req, res) {
   }));
 
   res.setHeader("Cache-Control", "private, max-age=0");
-  return res.json({ matches, myTipsMap, otherTipsMap, defaultMatchday: getDefaultMatchday(matches) });
+  return res.json({ matches, myTipsMap, otherTipsMap, tipStatusMap, defaultMatchday: getDefaultMatchday(matches) });
 }
