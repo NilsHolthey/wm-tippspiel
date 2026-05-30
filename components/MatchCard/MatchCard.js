@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import s from "./MatchCard.module.css";
 import { calcPoints } from "../../lib/scoring";
 import { IconCheck, IconMinus, IconTrendUp, IconX, IconClock, IconHourglass, IconWarning } from "../Icons";
@@ -43,7 +45,16 @@ function countdownStr(kickoff) {
   return `noch ${m}min`;
 }
 
-export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
+export default function MatchCard({ match, myTip, otherTips = [], onOpen, index = 0, dir = 0, isNewlyFinished = false }) {
+  const [live, setLive] = useState(false);
+  useEffect(() => {
+    const ko = new Date(match.kickoff).getTime();
+    const check = () => setLive(!match.finished && Date.now() >= ko && Date.now() <= ko + 110 * 60 * 1000);
+    check();
+    const id = setInterval(check, 60000);
+    return () => clearInterval(id);
+  }, [match.kickoff, match.finished]);
+
   const locked      = isLocked(match.kickoff);
   const urgent      = isUrgent(match.kickoff);
   const hasTip      = !!myTip && myTip.lateStatus !== "pending";
@@ -67,9 +78,16 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
   if (points === 3)             cardClass += " " + s.cardFlash3;
   if (latePending)              cardClass += " " + s.pendingLate;
   if (noTip && !match.finished) cardClass += " " + s.noTip;
+  if (isNewlyFinished)          cardClass += " " + s.cardFlashFinished;
 
   return (
-    <div className={cardClass} onClick={onOpen}>
+    <motion.div
+      className={cardClass}
+      onClick={onOpen}
+      initial={{ x: dir * 36, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.2, ease: "easeOut", delay: index * 0.055 }}
+    >
       <div className={s.inner}>
         <div className={s.meta}>
           {match.phase === "Gruppenphase"
@@ -77,6 +95,7 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
             : <span className={`${s.pill} ${s.pillDay}`}>{match.phase}</span>
           }
           <span className={s.metaDate}>{formatKickoff(match.kickoff)}</span>
+          {live && <span className={s.liveIndicator}><span className={s.liveDot}/>LIVE</span>}
           {urgent && <span className={s.metaUrgent} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />Deadline in {countdownStr(match.kickoff)}</span>}
           {countdown && !urgent && <span className={s.metaSoon} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />{countdown}</span>}
         </div>
@@ -142,6 +161,6 @@ export default function MatchCard({ match, myTip, otherTips = [], onOpen }) {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

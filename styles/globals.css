@@ -51,7 +51,8 @@ html {
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--dark);
+  background: linear-gradient(135deg, #0c0d1f 0%, #060a1b 50%, #0a0810 100%);
+  background-attachment: fixed;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

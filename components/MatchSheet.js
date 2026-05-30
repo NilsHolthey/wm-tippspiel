@@ -5,7 +5,7 @@ import Stepper from "./MatchCard/Stepper";
 import { calcPoints } from "../lib/scoring";
 import { calcStandings } from "../lib/standings";
 import { IconWarning, IconCheck } from "./Icons";
-import { celebrate } from "../utils/confetti";
+import { haptic } from "../utils/haptic";
 import s from "./MatchSheet.module.css";
 
 const LOCK_MIN = 60;
@@ -33,6 +33,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showTable, setShowTable] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
     x.set(0);
@@ -42,14 +43,11 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
     setDone(false);
     setSaving(false);
     setShowTable(false);
-    if (match.finished && myTipProp && myTipProp.lateStatus !== "pending") {
-      const pts = calcPoints({ h: myTipProp.h, a: myTipProp.a }, match.result);
-      if (pts === 3) celebrate(match._id);
-    }
   }, [match._id]);
 
-  // lock body scroll while open
+  // lock body scroll + haptic on open
   useEffect(() => {
+    haptic(6);
     document.documentElement.style.overflow = "hidden";
     return () => { document.documentElement.style.overflow = ""; };
   }, []);
@@ -80,11 +78,13 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
       });
       if (!res.ok) throw new Error();
       const newTip = { h, a, lateStatus: isLate ? "pending" : null };
+      haptic(10);
       setDone(true);
       setMyTip(newTip);
       onTipSaved?.(match._id, newTip);
     } catch {
-      alert("Fehler beim Speichern. Bitte erneut versuchen.");
+      setSaveError(true);
+      setTimeout(() => setSaveError(false), 3500);
     } finally {
       setSaving(false);
     }
@@ -354,6 +354,21 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
         </div>
       </div>
     </motion.div>
+
+    <AnimatePresence>
+      {saveError && (
+        <motion.div
+          className={s.errorToast}
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 80, opacity: 0 }}
+          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+        >
+          <IconWarning size={14} style={{ flexShrink: 0 }} />
+          Fehler beim Speichern – bitte erneut versuchen
+        </motion.div>
+      )}
+    </AnimatePresence>
     </>
   );
 }
