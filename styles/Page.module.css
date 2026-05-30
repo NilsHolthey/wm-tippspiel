@@ -6,7 +6,7 @@
 .app {
   min-height: 100dvh;
   width: 100%;
-  background: radial-gradient(ellipse at 50% 0%, #151829 0%, var(--dark) 65%);
+  background: transparent;
   position: relative;
   padding-top: calc(70px + env(safe-area-inset-top, 0px));
 }
@@ -171,6 +171,9 @@
   animation: shimmer 1.6s ease-in-out infinite;
 }
 .mlist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+
+.rankUp   { font-size: 0.58rem; font-weight: 700; color: var(--green); margin-left: 3px; vertical-align: middle; }
+.rankDown { font-size: 0.58rem; font-weight: 700; color: #f87171;      margin-left: 3px; vertical-align: middle; }
 
 /* leaderboard */
 .tableWrap {
@@ -892,26 +895,31 @@
 }
 
 /* ── leaderboard list ────────────────────────────────────────────────── */
-.lbList { display: flex; flex-direction: column; gap: 4px; }
+.lbList { display: flex; flex-direction: column; gap: 8px; }
 
 .lbCard {
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.05);
-  transition: border-color 0.2s;
+  background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.lbCardOpen { border-color: rgba(201,168,76,0.35); }
-.lbRowMe { background: rgba(201,168,76,0.07); }
+.lbCardOpen {
+  border-color: rgba(201,168,76,0.38);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.28), 0 0 0 1px rgba(201,168,76,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.lbRowMe { background: linear-gradient(145deg, rgba(201,168,76,0.1) 0%, rgba(201,168,76,0.04) 100%); }
 
 .lbRow {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 13px 16px;
+  padding: 14px 16px;
   cursor: pointer;
   transition: background 0.12s;
 }
-.lbRow:active { background: rgba(255,255,255,0.07); }
+.lbRow:active { background: rgba(255,255,255,0.06); }
 
 .lbDetail {
   display: flex;
@@ -934,7 +942,7 @@
 .lbInfo { flex: 1; min-width: 0; }
 .lbName { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
 .lbYou { font-size: 0.65rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--gold); background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); border-radius: 4px; padding: 1px 5px; font-weight: 600; }
-.lbBar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.lbBar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
 .lbBarFill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
 
 .lbPts {

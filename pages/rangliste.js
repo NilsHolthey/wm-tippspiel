@@ -14,12 +14,32 @@ export default function RanglistePage({ board, matchdays }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const currentUserId = session?.user?.id;
-  const [showChart, setShowChart] = useState(false);
   const [expanded, setExpanded] = useState(new Set());
+  const [showChart, setShowChart] = useState(false);
+  const [rankChanges, setRankChanges] = useState({});
 
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/login");
   }, [status, router]);
+
+  useEffect(() => {
+    if (!board.length) return;
+    const key = "wm_ranks";
+    try {
+      const stored = JSON.parse(localStorage.getItem(key) || "{}");
+      const changes = {};
+      board.forEach((p, i) => {
+        if (stored[p.id] !== undefined && stored[p.id] !== i) {
+          changes[p.id] = stored[p.id] - i;
+        }
+      });
+      setRankChanges(changes);
+      const next = {};
+      board.forEach((p, i) => { next[p.id] = i; });
+      localStorage.setItem(key, JSON.stringify(next));
+    } catch {}
+  }, [board]);
+
   if (status === "loading") return (
     <div className={s.app}>
       <Nav />
@@ -32,7 +52,7 @@ export default function RanglistePage({ board, matchdays }) {
             <div key={i} className={s.lbCard} style={{ padding: "13px 16px", display: "flex", alignItems: "center", gap: 14 }}>
               <div className={s.skeletonBlock} style={{ width: 26, height: 22, borderRadius: 4 }} />
               <div style={{ flex: 1 }}>
-                <div className={s.skeletonBlock} style={{ width: `${50 + Math.random() * 30}%`, height: 13, borderRadius: 4, marginBottom: 9 }} />
+                <div className={s.skeletonBlock} style={{ width: "55%", height: 13, borderRadius: 4, marginBottom: 9 }} />
                 <div className={s.skeletonBlock} style={{ width: "70%", height: 3, borderRadius: 99 }} />
               </div>
               <div className={s.skeletonBlock} style={{ width: 38, height: 26, borderRadius: 4 }} />
@@ -94,7 +114,11 @@ export default function RanglistePage({ board, matchdays }) {
                       return next;
                     })}
                   >
-                    <span className={s.lbRank} style={{ color: rankColor }}>{i + 1}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, width: 42 }}>
+                      <span className={s.lbRank} style={{ color: rankColor }}>{i + 1}</span>
+                      {rankChanges[p.id] > 0 && <span className={s.rankUp}>▲{rankChanges[p.id]}</span>}
+                      {rankChanges[p.id] < 0 && <span className={s.rankDown}>▼{Math.abs(rankChanges[p.id])}</span>}
+                    </div>
                     <div className={s.lbInfo}>
                       <div className={s.lbName}>
                         {p.name}

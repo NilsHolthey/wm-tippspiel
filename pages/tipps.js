@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
-import { flushSync } from "react-dom";
 import useSWR from "swr";
 import Nav from "../components/Nav";
 import MatchCard from "../components/MatchCard/MatchCard";
@@ -10,17 +9,22 @@ import MatchCardSkeleton from "../components/MatchCard/MatchCardSkeleton";
 import MatchSheet from "../components/MatchSheet";
 import { IconInbox, IconCheck } from "../components/Icons";
 import s from "../styles/Page.module.css";
-import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { haptic } from "../utils/haptic";
 
+const LOCK_MIN = 60;
 const KO_LABELS  = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
 const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
+
+function isDeadlinePast(kickoff) {
+  return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
+}
 
 const fetcher = (url) => fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json(); });
 
 export default function TippsPage({ initialData }) {
   const router = useRouter();
-  const { data } = useSWR("/api/tipps/data", fetcher, {
+  const { data, mutate } = useSWR("/api/tipps/data", fetcher, {
     fallbackData: initialData ?? undefined,
     revalidateOnFocus: true,
     dedupingInterval: 30000,
@@ -40,7 +44,22 @@ export default function TippsPage({ initialData }) {
   const activePillRef = useRef(null);
   const mdNavRef = useRef(null);
   const slideDir = useRef(1);
-  const x = useMotionValue(0);
+  const prevFinishedRef = useRef(null);
+  const [newlyFinished, setNewlyFinished] = useState(new Set());
+
+  useEffect(() => {
+    if (!data?.matches) return;
+    const currentFinished = new Set(data.matches.filter(m => m.finished).map(m => m._id));
+    if (prevFinishedRef.current !== null) {
+      const fresh = [...currentFinished].filter(id => !prevFinishedRef.current.has(id));
+      if (fresh.length) {
+        setNewlyFinished(new Set(fresh));
+        const t = setTimeout(() => setNewlyFinished(new Set()), 5000);
+        return () => clearTimeout(t);
+      }
+    }
+    prevFinishedRef.current = currentFinished;
+  }, [data]);
 
   // sync selected to defaultMatchday once data loads
   useEffect(() => {
@@ -51,26 +70,25 @@ export default function TippsPage({ initialData }) {
     activePillRef.current?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
   }, [selected]);
 
-  async function handleDragEnd(_, info) {
-    const swipeNext = info.offset.x < -40 || info.velocity.x < -300;
-    const swipePrev = info.offset.x >  40 || info.velocity.x >  300;
-    if (swipeNext && nextDay) {
-      haptic(8);
-      slideDir.current = 1;
-      await animate(x, -600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
-      x.set(600);
-      flushSync(() => setSelected(nextDay));
-      animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
-    } else if (swipePrev && prevDay) {
-      haptic(8);
-      slideDir.current = -1;
-      await animate(x, 600, { duration: 0.2, ease: [0.4, 0, 1, 1] });
-      x.set(-600);
-      flushSync(() => setSelected(prevDay));
-      animate(x, 0, { duration: 0.2, ease: [0, 0, 0.2, 1] });
-    } else {
-      animate(x, 0, { type: "spring", stiffness: 500, damping: 35 });
-    }
+  // swipe gesture
+  const swipeStartX = useRef(null);
+  const swipeStartY = useRef(null);
+
+  function handleSwipeStart(e) {
+    if (sheetId) return;
+    if (mdNavRef.current?.contains(e.target)) return;
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+  }
+
+  function handleSwipeEnd(e) {
+    if (sheetId || swipeStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - swipeStartX.current;
+    const dy = e.changedTouches[0].clientY - swipeStartY.current;
+    swipeStartX.current = null;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0 && nextDay) { slideDir.current = 1;  setSelected(nextDay);  haptic(8); }
+    if (dx > 0 && prevDay) { slideDir.current = -1; setSelected(prevDay);  haptic(8); }
   }
 
   // overlay state
@@ -139,13 +157,16 @@ export default function TippsPage({ initialData }) {
   const sectionHeader = KO_HEADERS[selected] ?? `Spieltag ${selected}`;
 
   function renderCards(list) {
-    return list.map((m) => (
+    return list.map((m, i) => (
       <MatchCard
         key={m._id}
         match={m}
         myTip={myTipsMap[m._id] ?? null}
         otherTips={otherTipsMap[m._id] ?? []}
         onOpen={() => openSheet(m._id)}
+        index={i}
+        dir={slideDir.current}
+        isNewlyFinished={newlyFinished.has(m._id)}
       />
     ));
   }
@@ -155,7 +176,7 @@ export default function TippsPage({ initialData }) {
       <Head><title>Tipps – WM Tippspiel</title></Head>
       <div className={s.app}>
         <Nav />
-        <div className={s.wrap}>
+        <div className={s.wrap} onTouchStart={handleSwipeStart} onTouchEnd={handleSwipeEnd}>
           <div className={s.ph}>
             <div className={s.ptitle}>MEINE <span>TIPPS</span></div>
             {allOpen.length > 0 && (
@@ -222,15 +243,16 @@ export default function TippsPage({ initialData }) {
                 ))}
               </>
             ) : (
-              <motion.div
-                drag="x"
-                dragConstraints={false}
-                dragDirectionLock
-                dragMomentum={false}
-                style={{ x, touchAction: "pan-y" }}
-                onDragEnd={handleDragEnd}
-              >
-                <div key={selected}>
+              <AnimatePresence mode="wait" custom={slideDir.current} initial={false}>
+                <motion.div
+                  key={selected}
+                  custom={slideDir.current}
+                  variants={{
+                    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -40 : 40 }),
+                  }}
+                  exit="exit"
+                  transition={{ duration: 0.1, ease: "easeIn" }}
+                >
                   {currentMatches.length === 0 ? (
                     <div className={s.emptyState}>
                       <IconInbox size={44} className={s.emptyIcon} style={{ color: "var(--muted)" }} />
@@ -252,8 +274,8 @@ export default function TippsPage({ initialData }) {
                       <div className={s.mlist}>{renderCards(currentMatches)}</div>
                     </>
                   )}
-                </div>
-              </motion.div>
+                </motion.div>
+              </AnimatePresence>
             )}
           </div>
         </div>

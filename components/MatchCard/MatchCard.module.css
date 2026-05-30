@@ -1,3 +1,33 @@
+@keyframes pulseLive {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.4); }
+}
+@keyframes flashFinished {
+  0%   { box-shadow: 0 4px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(201,168,76,0.6); }
+  20%  { box-shadow: 0 0 0 3px rgba(201,168,76,0.45), 0 8px 28px rgba(201,168,76,0.15); }
+  100% { box-shadow: 0 4px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(201,168,76,0); }
+}
+
+.liveDot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: pulseLive 1.4s ease-in-out infinite;
+}
+.liveIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--green);
+  text-transform: uppercase;
+}
+.cardFlashFinished { animation: flashFinished 4s ease-out forwards; }
+
 @keyframes pts3Flash {
   0%   { box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07); }
   28%  { box-shadow: 0 0 0 2px rgba(34,197,94,0.55), 0 8px 28px rgba(34,197,94,0.22), inset 0 1px 0 rgba(255,255,255,0.07); }
