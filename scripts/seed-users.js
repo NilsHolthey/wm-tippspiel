@@ -10,6 +10,8 @@ import bcrypt from "bcryptjs";
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) { console.error("MONGODB_URI not set"); process.exit(1); }
 
+if (!process.env.USERS_JSON) { console.error("USERS_JSON not set"); process.exit(1); }
+
 const UserSchema = new mongoose.Schema({
   username:     { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
@@ -20,15 +22,7 @@ const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 const pw = (p) => bcrypt.hashSync(p, 10);
 
-const USERS = [
-  { username: "Nils",     password: "nils2026",     isAdmin: true  },
-  { username: "Georgina", password: "georgina2026", isAdmin: false },
-  { username: "Kim",      password: "kim2026",      isAdmin: false },
-  { username: "Collin",   password: "collin2026",   isAdmin: false },
-  { username: "Linn",     password: "linn2026",     isAdmin: false },
-  { username: "Svend",    password: "svend2026",    isAdmin: false },
-  { username: "Gisela",   password: "gisela2026",   isAdmin: false },
-];
+const USERS = JSON.parse(process.env.USERS_JSON);
 
 await mongoose.connect(MONGODB_URI, { bufferCommands: false });
 console.log("Connected");
