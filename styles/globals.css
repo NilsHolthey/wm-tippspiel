@@ -10,7 +10,10 @@
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+*::-webkit-scrollbar { display: none; }
 
 input, textarea, select, [contenteditable] {
   -webkit-user-select: text;

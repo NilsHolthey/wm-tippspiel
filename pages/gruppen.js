@@ -110,7 +110,27 @@ export default function GruppenPage({ groups, standings }) {
 
   const [sheetId, setSheetId] = useState(null);
 
-  if (status === "loading" || status === "unauthenticated") return null;
+  if (status === "loading") return (
+    <div className={s.app}>
+      <Nav />
+      <div className={s.wrap}>
+        <div className={s.ph} style={{ marginBottom: 18 }}>
+          <div className={s.skeletonBlock} style={{ width: 120, height: 32, borderRadius: 6 }} />
+        </div>
+        <div className={s.grpGrid}>
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className={s.grpCard}>
+              <div className={s.skeletonBlock} style={{ width: 80, height: 11, borderRadius: 4, marginBottom: 14 }} />
+              {[...Array(4)].map((_, j) => (
+                <div key={j} className={s.skeletonBlock} style={{ height: 22, borderRadius: 4, marginBottom: 5 }} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+  if (status === "unauthenticated") return null;
   const sheetMatch = sheetId ? tipsMatches.find(m => m._id === sheetId) : null;
 
   const allMatchdays = [...new Set(tipsMatches.map(m => m.matchday))].sort((a, b) => a - b);
