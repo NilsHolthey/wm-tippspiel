@@ -23,6 +23,10 @@ export default function RanglistePage({ board, matchdays }) {
   }, [status, router]);
 
   useEffect(() => {
+    if (currentUserId) setExpanded(new Set([currentUserId]));
+  }, [currentUserId]);
+
+  useEffect(() => {
     if (!board.length) return;
     const key = "wm_ranks";
     try {
