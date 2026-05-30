@@ -244,16 +244,15 @@ export default function TippsPage({ initialData }) {
                 ))}
               </>
             ) : (
-              <AnimatePresence mode="wait" custom={slideDir.current} initial={false}>
-                <motion.div
-                  key={selected}
-                  custom={slideDir.current}
-                  variants={{
-                    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -40 : 40 }),
-                  }}
-                  exit="exit"
-                  transition={{ duration: 0.1, ease: "easeIn" }}
-                >
+              <motion.div
+                drag="x"
+                dragConstraints={false}
+                dragDirectionLock
+                dragMomentum={false}
+                style={{ x, touchAction: "pan-y" }}
+                onDragEnd={handleDragEnd}
+              >
+                <div key={selected}>
                   {currentMatches.length === 0 ? (
                     <div className={s.emptyState}>
                       <IconInbox size={44} className={s.emptyIcon} style={{ color: "var(--muted)" }} />
@@ -275,8 +274,8 @@ export default function TippsPage({ initialData }) {
                       <div className={s.mlist}>{renderCards(currentMatches)}</div>
                     </>
                   )}
-                </motion.div>
-              </AnimatePresence>
+                </div>
+              </motion.div>
             )}
           </div>
         </div>
