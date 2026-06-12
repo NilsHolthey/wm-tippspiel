@@ -570,7 +570,7 @@
 /* match list */
 .grpMatches {
   border-top: 1px solid var(--border);
-  padding: 8px 0 4px;
+  padding: 8px 8px 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
