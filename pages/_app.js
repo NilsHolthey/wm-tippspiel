@@ -5,58 +5,62 @@ import "@/styles/globals.css";
 import OfflineBanner from "@/components/OfflineBanner";
 import BottomNav from "@/components/BottomNav";
 
-const PTR_THRESHOLD = 72;
+const PTR_SHOW    = 28;   // px before overlay appears
+const PTR_THRESHOLD = 110;  // px to actually trigger refresh
 
 function usePullToRefresh(onRefresh) {
-  const [pullY, setPullY] = useState(0);
+  const [active, setActive] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(null);
-  const pulling = useRef(false);
+  const pullDist = useRef(0);
 
   useEffect(() => {
     const onStart = (e) => {
       if (window.scrollY > 2) return;
       if (document.documentElement.style.overflow === "hidden") return;
       startY.current = e.touches[0].clientY;
+      pullDist.current = 0;
     };
     const onMove = (e) => {
       if (startY.current === null) return;
       const dy = e.touches[0].clientY - startY.current;
       if (dy > 0) {
-        pulling.current = true;
-        setPullY(Math.min(dy * 0.45, PTR_THRESHOLD + 16));
+        e.preventDefault();
+        pullDist.current = dy;
+        if (dy >= PTR_SHOW && !active) setActive(true);
+        if (dy < PTR_SHOW && active)  setActive(false);
       }
     };
     const onEnd = async () => {
-      if (!pulling.current) return;
-      pulling.current = false;
-      const captured = pullY;
-      setPullY(0);
+      if (startY.current === null) return;
+      const dist = pullDist.current;
       startY.current = null;
-      if (captured >= PTR_THRESHOLD) {
+      pullDist.current = 0;
+      setActive(false);
+      if (dist >= PTR_THRESHOLD) {
         setRefreshing(true);
         await onRefresh();
         setRefreshing(false);
       }
     };
     document.addEventListener("touchstart", onStart, { passive: true });
-    document.addEventListener("touchmove",  onMove,  { passive: true });
+    document.addEventListener("touchmove",  onMove,  { passive: false });
     document.addEventListener("touchend",   onEnd,   { passive: true });
     return () => {
       document.removeEventListener("touchstart", onStart);
       document.removeEventListener("touchmove",  onMove);
       document.removeEventListener("touchend",   onEnd);
     };
-  }, [pullY, onRefresh]);
+  }, [active, onRefresh]);
 
-  return { pullY, refreshing };
+  return { active, refreshing };
 }
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
   const router = useRouter();
   const hideTimer = useRef(null);
 
-  const { pullY, refreshing } = usePullToRefresh(() => router.reload());
+  const { active: ptrActive, refreshing } = usePullToRefresh(() => router.reload());
 
   useEffect(() => {
     const start = (_url, { shallow } = {}) => {
@@ -79,19 +83,17 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
 
   const showChrome = router.pathname !== "/login";
 
-  const ptrProgress = Math.min(pullY / PTR_THRESHOLD, 1);
-
   return (
     <SessionProvider session={session}>
       {/* Pull-to-refresh overlay */}
-      {(pullY > 0 || refreshing) && showChrome && (
+      {(ptrActive || refreshing) && showChrome && (
         <div style={{
           position: "fixed",
           inset: 0,
           zIndex: 400,
           pointerEvents: "none",
-          opacity: refreshing ? 1 : ptrProgress,
-          transition: refreshing ? "none" : "opacity 0.1s",
+          opacity: 1,
+          transition: "opacity 0.15s",
           backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)",
           background: "rgba(6, 10, 27, 0.55)",
@@ -103,8 +105,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
             width="36" height="36" viewBox="0 0 24 24" fill="none"
             stroke="#ceac4d" strokeWidth="2" strokeLinecap="round"
             style={{
-              animation: refreshing ? "spin 0.7s linear infinite" : "none",
-              transform: refreshing ? "none" : `rotate(${ptrProgress * 270}deg)`,
+              animation: "spin 0.7s linear infinite",
               display: "block",
               filter: "drop-shadow(0 0 10px rgba(201,168,76,0.6))",
             }}
