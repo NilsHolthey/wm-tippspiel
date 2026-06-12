@@ -96,7 +96,7 @@ export default function MatchCard({ match, myTip, otherTips = [], tipStatus = nu
           }
           <span className={s.metaDate}>{formatKickoff(match.kickoff)}</span>
           {live && <span className={s.liveIndicator}><span className={s.liveDot}/>LIVE</span>}
-          {urgent && <span className={s.metaUrgent} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />Noch {countdownStr(match.kickoff)} zum Tippen</span>}
+          {urgent && <span className={s.metaUrgent} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} /> {countdownStr(match.kickoff)} </span>}
         </div>
 
         <div className={s.row}>
