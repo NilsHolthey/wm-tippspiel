@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { SessionProvider } from "next-auth/react";
 import "@/styles/globals.css";
 import OfflineBanner from "@/components/OfflineBanner";
 import BottomNav from "@/components/BottomNav";
-import LoadingScreen from "@/components/LoadingScreen";
 
 const PTR_THRESHOLD = 72;
 
@@ -55,7 +54,6 @@ function usePullToRefresh(onRefresh) {
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const hideTimer = useRef(null);
 
   const { pullY, refreshing } = usePullToRefresh(() => router.reload());
@@ -64,13 +62,9 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
     const start = (_url, { shallow } = {}) => {
       if (shallow) return;
       clearTimeout(hideTimer.current);
-      setLoading(true);
     };
     const done = () => {
       clearTimeout(hideTimer.current);
-      // Hold the loading screen for 350ms after routeChangeComplete so the
-      // new page has time to paint before we reveal it (fixes iOS Chrome flash).
-      hideTimer.current = setTimeout(() => setLoading(false), 350);
     };
     router.events.on("routeChangeStart",    start);
     router.events.on("routeChangeComplete", done);
@@ -89,24 +83,30 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
 
   return (
     <SessionProvider session={session}>
-      {/* {loading && <LoadingScreen />} */}
-
-      {/* Pull-to-refresh indicator */}
+      {/* Pull-to-refresh overlay */}
       {(pullY > 0 || refreshing) && showChrome && (
         <div style={{
-          position: "fixed", top: 12, left: "50%", transform: "translateX(-50%)",
-          zIndex: 400, pointerEvents: "none",
+          position: "fixed",
+          inset: 0,
+          zIndex: 400,
+          pointerEvents: "none",
           opacity: refreshing ? 1 : ptrProgress,
           transition: refreshing ? "none" : "opacity 0.1s",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          background: "rgba(6, 10, 27, 0.55)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}>
           <svg
-            width="28" height="28" viewBox="0 0 24 24" fill="none"
-            stroke="#ceac4d" strokeWidth="2.2" strokeLinecap="round"
+            width="36" height="36" viewBox="0 0 24 24" fill="none"
+            stroke="#ceac4d" strokeWidth="2" strokeLinecap="round"
             style={{
               animation: refreshing ? "spin 0.7s linear infinite" : "none",
               transform: refreshing ? "none" : `rotate(${ptrProgress * 270}deg)`,
               display: "block",
-              filter: "drop-shadow(0 0 6px rgba(201,168,76,0.5))",
+              filter: "drop-shadow(0 0 10px rgba(201,168,76,0.6))",
             }}
           >
             <polyline points="23 4 23 10 17 10" />
