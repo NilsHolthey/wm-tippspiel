@@ -201,14 +201,11 @@ export default function AdminPage({ matches, lateRequestsInit }) {
             )}
           </div>
 
-          {/* Sync */}
-          <div className={s.asec}>
+          {/* Sync — disabled: results don't arrive in time via openfootball */}
+          {/* <div className={s.asec}>
             <div className={s.asecTitle}><IconRefresh size={14} /> Ergebnisse synchronisieren</div>
             <SyncSection />
-            <span style={{ fontSize: "0.75rem", color: "var(--muted)", marginTop: 6, display: "block" }}>
-              Zieht Ergebnisse und Teamnamen von openfootball (GitHub). Kein API-Key nötig.
-            </span>
-          </div>
+          </div> */}
 
           {/* Results entry */}
           <div className={s.asec}>

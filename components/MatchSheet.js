@@ -66,6 +66,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
   const locked = isDeadlinePast(match.kickoff);
   const isLate = locked && !match.finished;
   const hasTip = !!myTip && myTip.lateStatus !== "pending";
+  const isLateChange = isLate && hasTip; // deadline passed + already has tip → no changes
   const tipsVisible = match.finished || (locked && hasTip);
 
   async function submit() {
@@ -288,14 +289,21 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
           </div>
         </div>
 
-        {isLate && (
+        {isLateChange && (
+          <div className={s.mpLate} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <IconWarning size={15} style={{ flexShrink: 0 }} />
+            Deadline abgelaufen – keine Änderung mehr möglich
+          </div>
+        )}
+
+        {isLate && !isLateChange && (
           <div className={s.mpLate} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <IconWarning size={15} style={{ flexShrink: 0 }} />
             Deadline abgelaufen — Admin muss diesen Tipp bestätigen
           </div>
         )}
 
-        {!match.finished ? (
+        {!match.finished && !isLateChange ? (
           <div className={s.mpTipping}>
             <div className={s.mpTipLabel}>Dein Tipp</div>
             <div className={s.mpSteppers}>

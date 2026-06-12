@@ -109,6 +109,13 @@
 .pts0 { background: rgba(239,68,68,0.1);   color: #f87171; }
 
 .noTipBadge  { font-size: 0.7rem; color: #f87171; font-style: italic; }
+.noChangeRow {
+  font-size: 0.68rem;
+  color: #f87171;
+  font-style: italic;
+  padding: 6px 16px 8px;
+  border-top: 1px solid rgba(239,68,68,0.12);
+}
 .lateBadge   { font-size: 0.7rem; color: var(--yellow); display: flex; align-items: center; gap: 4px; }
 .lateMuted   { color: var(--muted); font-weight: 400; }
 

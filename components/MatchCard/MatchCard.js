@@ -96,8 +96,7 @@ export default function MatchCard({ match, myTip, otherTips = [], tipStatus = nu
           }
           <span className={s.metaDate}>{formatKickoff(match.kickoff)}</span>
           {live && <span className={s.liveIndicator}><span className={s.liveDot}/>LIVE</span>}
-          {urgent && <span className={s.metaUrgent} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />Deadline in {countdownStr(match.kickoff)}</span>}
-          {countdown && !urgent && <span className={s.metaSoon} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />{countdown}</span>}
+          {urgent && <span className={s.metaUrgent} suppressHydrationWarning><IconClock size={11} style={{ verticalAlign: "middle", marginRight: 3 }} />Noch {countdownStr(match.kickoff)} zum Tippen</span>}
         </div>
 
         <div className={s.row}>
@@ -137,15 +136,30 @@ export default function MatchCard({ match, myTip, otherTips = [], tipStatus = nu
           {noTip && match.finished  && <span className={s.noTipBadge}>Kein Tipp abgegeben</span>}
         </div>
 
-        {!match.finished && !latePending && (
+        {!match.finished && !latePending && !locked && (
           <button
-            className={`${s.action} ${locked ? s.actionLate : hasTip ? s.actionEdit : s.actionTip}`}
+            className={`${s.action} ${hasTip ? s.actionEdit : s.actionTip}`}
             onClick={(e) => { e.stopPropagation(); onOpen(); }}
           >
-            {locked ? <><IconWarning size={12} style={{ verticalAlign: "middle", marginRight: 4 }} />Verspätet tippen</> : hasTip ? "Ändern" : "Jetzt tippen →"}
+            {hasTip ? "Ändern" : "Jetzt tippen →"}
+          </button>
+        )}
+        {!match.finished && !latePending && locked && !hasTip && (
+          <button
+            className={`${s.action} ${s.actionLate}`}
+            onClick={(e) => { e.stopPropagation(); onOpen(); }}
+          >
+            <IconWarning size={12} style={{ verticalAlign: "middle", marginRight: 4 }} />Verspätet tippen
           </button>
         )}
       </div>
+
+      {!match.finished && !latePending && locked && hasTip && (
+        <div className={s.noChangeRow}>
+          <IconWarning size={11} style={{ verticalAlign: "middle", marginRight: 5 }} />
+          Deadline abgelaufen – keine Änderung mehr möglich
+        </div>
+      )}
 
       {!tipsVisible && tipStatus && (
         <div className={s.othersRow}>

@@ -355,18 +355,17 @@
 .nmName { font-size: 0.86rem; font-weight: 600; }
 .nmVs { text-align: center; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; }
 
-.nmMeta {
+.nmFooter {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
-  color: var(--muted);
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
 }
-.nmDot { color: var(--border); }
-.nmTip { font-size: 0.67rem; padding: 1px 5px; border-radius: 3px; background: var(--d4); }
+.nmDate { font-size: 0.68rem; color: var(--muted); }
+.nmTip { font-size: 0.67rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; flex-shrink: 0; }
 .nmTipYes { color: var(--gold); background: rgba(201,168,76,0.1); }
-.nmTipNo  { color: #f87171; }
+.nmTipNo  { color: #f87171; font-style: italic; font-weight: 400; background: none; }
 
 /* result row */
 .rRow {
@@ -571,22 +570,25 @@
 /* match list */
 .grpMatches {
   border-top: 1px solid var(--border);
-  padding: 4px 0;
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .grpMatch {
-  padding: 6px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.025);
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
   cursor: pointer;
-  border-radius: 6px;
   transition: background 0.12s;
 }
-.grpMatch:active { background: rgba(255,255,255,0.04); }
-.grpMatch:last-child { border-bottom: none; }
-.grpMatchDone { opacity: 0.75; }
+.grpMatch:active { background: rgba(255,255,255,0.06); }
+.grpMatchDone { opacity: 0.8; }
 
 .grpMatchMeta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-.grpMatchTip { font-size: 0.62rem; font-weight: 700; color: var(--gold); background: rgba(201,168,76,0.1); border-radius: 4px; padding: 1px 5px; }
+.grpMatchTip { font-size: 0.62rem; font-weight: 700; background: rgba(201,168,76,0.1); border-radius: 4px; padding: 1px 5px; }
 
 .grpMatchDate {
   font-size: 0.62rem;
@@ -630,6 +632,24 @@
   min-width: 36px;
   text-align: center;
 }
+
+.grpMatchOthers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.grpMatchOtherChip {
+  font-size: 0.62rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 5px;
+  padding: 2px 7px;
+  text-align: center;
+}
+.grpMatchOtherMuted { color: var(--muted); background: rgba(255,255,255,0.05); }
 
 @media (max-width: 480px) {
   .grpGrid { grid-template-columns: 1fr; }
