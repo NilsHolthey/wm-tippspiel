@@ -123,13 +123,15 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
         </div>
       )}
 
-      {/* Everything else pulls with the page */}
+      <OfflineBanner />
+      <BottomNav />
+
+      {/* Page content + fixed chrome pull together */}
       <div style={{
         transform: `translateY(${pullOffset}px)`,
         transition: isReleased ? "transform 0.3s ease" : "none",
         willChange: pullY > 0 ? "transform" : "auto",
       }}>
-        <OfflineBanner />
         {showChrome && (
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0,
@@ -138,7 +140,6 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
             zIndex: 190, pointerEvents: "none",
           }} />
         )}
-        <Component {...pageProps} />
         {showChrome && (
           <div style={{
             position: "fixed", bottom: 0, left: 0, right: 0,
@@ -147,7 +148,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
             zIndex: 190, pointerEvents: "none",
           }} />
         )}
-        <BottomNav />
+        <Component {...pageProps} />
       </div>
     </SessionProvider>
   );
