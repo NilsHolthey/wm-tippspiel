@@ -5,8 +5,8 @@ import "@/styles/globals.css";
 import OfflineBanner from "@/components/OfflineBanner";
 import BottomNav from "@/components/BottomNav";
 
-const PTR_SHOW    = 28;   // px before overlay appears
-const PTR_THRESHOLD = 110;  // px to actually trigger refresh
+const PTR_SHOW    = 110;  // px before overlay appears
+const PTR_THRESHOLD = 220;  // px to actually trigger refresh
 
 function usePullToRefresh(onRefresh) {
   const [active, setActive] = useState(false);
