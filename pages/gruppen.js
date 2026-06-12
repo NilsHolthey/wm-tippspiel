@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import useSWR from "swr";
 import { shortName } from "../lib/teamNames";
 import { calcStandings } from "../lib/standings";
+import { calcPoints } from "../lib/scoring";
 import Nav from "../components/Nav";
 import MatchSheet from "../components/MatchSheet";
 import KOBracket from "../components/KOBracket";
@@ -54,13 +55,16 @@ function StandingsTable({ rows }) {
   );
 }
 
-function MatchList({ matches, onOpen, myTipsMap }) {
+const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1 };
+
+function MatchList({ matches, onOpen, myTipsMap, otherTipsMap }) {
   if (!matches.length) return null;
   return (
     <div className={s.grpMatches}>
       {matches.map(m => {
         const tip = myTipsMap?.[m._id];
         const hasTip = tip && tip.lateStatus !== "pending";
+        const others = m.finished ? (otherTipsMap?.[m._id] ?? []) : [];
         return (
           <div
             key={m._id}
@@ -69,9 +73,18 @@ function MatchList({ matches, onOpen, myTipsMap }) {
           >
             <div className={s.grpMatchMeta}>
               <span className={s.grpMatchDate}>{formatDate(m.kickoff)}</span>
-              {hasTip && (
-                <span className={s.grpMatchTip}>{tip.h}:{tip.a}</span>
-              )}
+              {hasTip && (() => {
+                const pts = m.finished ? calcPoints({ h: tip.h, a: tip.a }, m.result) : null;
+                const ptsCls = pts != null ? (PTS_CLS[pts] ?? s.grpMatchOtherMuted) : "";
+                return (
+                  <span
+                    className={`${s.grpMatchTip} ${ptsCls}`}
+                    style={pts == null ? { color: "var(--gold)" } : undefined}
+                  >
+                    Du {tip.h}:{tip.a}
+                  </span>
+                );
+              })()}
             </div>
             <div className={s.grpMatchTeams}>
               <div className={s.grpMatchHome}>
@@ -86,6 +99,18 @@ function MatchList({ matches, onOpen, myTipsMap }) {
                 <span className={s.grpMatchFlag}>{m.awayFlag}</span>
               </div>
             </div>
+            {others.length > 0 && (
+              <div className={s.grpMatchOthers}>
+                {others.map((o, i) => {
+                  const pts = calcPoints({ h: o.h, a: o.a }, m.result);
+                  return (
+                    <span key={i} className={`${s.grpMatchOtherChip} ${PTS_CLS[pts] ?? s.grpMatchOtherMuted}`}>
+                      {o.name} {o.h}:{o.a}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}
@@ -198,7 +223,7 @@ export default function GruppenPage({ groups, standings, koMatches }) {
                 >
                   <div className={s.grpCardTitle}>Gruppe {g}</div>
                   <StandingsTable rows={standings[g] ?? []} />
-                  <MatchList matches={groups[g]} onOpen={setSheetId} myTipsMap={myTipsMap} />
+                  <MatchList matches={groups[g]} onOpen={setSheetId} myTipsMap={myTipsMap} otherTipsMap={otherTipsMap} />
                 </motion.div>
               ))}
             </div>

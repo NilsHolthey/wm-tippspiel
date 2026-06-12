@@ -78,6 +78,13 @@ export default function RanglistePage({ board, matchdays }) {
         <div className={s.wrap}>
           <div className={s.ph} style={{ marginBottom: 22 }}>
             <div className={s.ptitle}><span>RANGLISTE</span></div>
+            <button
+              onClick={() => router.push("/stats")}
+              className={s.mdPill}
+              style={{ alignSelf: "center" }}
+            >
+              Details
+            </button>
             {matchdays?.length >= 2 && (
               <button
                 onClick={() => setShowChart(v => !v)}
@@ -178,7 +185,10 @@ export default function RanglistePage({ board, matchdays }) {
   );
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps(context) {
+  const { getSession } = await import("next-auth/react");
+  const session = await getSession(context);
+  if (!session) return { redirect: { destination: "/login", permanent: false } };
   try {
     const { connectDB } = await import("../lib/db");
     const { default: User } = await import("../models/User");
@@ -222,8 +232,8 @@ export async function getStaticProps() {
 
     board.sort((a, b) => b.pts - a.pts || b.correct - a.correct || b.diff - a.diff);
 
-    return { props: { board, matchdays }, revalidate: 60 };
+    return { props: { board, matchdays } };
   } catch (e) {
-    return { props: { board: [], matchdays: [] }, revalidate: 30 };
+    return { props: { board: [], matchdays: [] } };
   }
 }

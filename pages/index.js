@@ -44,33 +44,35 @@ function formatDate(iso) {
     " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr";
 }
 
+function MatchRowTeams({ m, center }) {
+  return (
+    <div className={s.nmTeams}>
+      <div className={s.nmHome}>
+        <span className={s.nmFlag}>{m.homeFlag}</span>
+        <span className={s.nmName}>{m.home}</span>
+      </div>
+      {center}
+      <div className={s.nmAway}>
+        <span className={s.nmName}>{m.away}</span>
+        <span className={s.nmFlag}>{m.awayFlag}</span>
+      </div>
+    </div>
+  );
+}
+
 function UpcomingMatches({ matches, myTipsMap }) {
   if (!matches.length) return <p className={s.empty}>Keine bevorstehenden Spiele.</p>;
   return (
     <div>
       {matches.map(m => {
         const tip = myTipsMap[m._id];
-        const label = m.group ? `Gruppe ${m.group}` : m.phase;
         return (
           <div key={m._id} className={s.nmRow}>
-            <div className={s.nmTeams}>
-              <div className={s.nmHome}>
-                <span className={s.nmFlag}>{m.homeFlag}</span>
-                <span className={s.nmName}>{m.home}</span>
-              </div>
-              <span className={s.nmVs}>–:–</span>
-              <div className={s.nmAway}>
-                <span className={s.nmName}>{m.away}</span>
-                <span className={s.nmFlag}>{m.awayFlag}</span>
-              </div>
-            </div>
-            <div className={s.nmMeta}>
-              <span>{formatDate(m.kickoff)}</span>
-              <span className={s.nmDot}>·</span>
-              <span>{label}</span>
-              <span className={s.nmDot}>·</span>
+            <MatchRowTeams m={m} center={<span className={s.nmVs}>–:–</span>} />
+            <div className={s.nmFooter}>
+              <span className={s.nmDate}>{formatDate(m.kickoff)}</span>
               {tip
-                ? <span className={`${s.nmTip} ${s.nmTipYes}`}>Tipp: {tip.h}:{tip.a}</span>
+                ? <span className={`${s.nmTip} ${s.nmTipYes}`}>{tip.h}:{tip.a}</span>
                 : <span className={`${s.nmTip} ${s.nmTipNo}`}>Kein Tipp</span>
               }
             </div>
@@ -83,11 +85,7 @@ function UpcomingMatches({ matches, myTipsMap }) {
 
 function RecentResults({ results, myTipsMap }) {
   if (!results.length) {
-    return (
-      <p className={s.empty}>
-        Noch keine Ergebnisse. Das Turnier startet am 11. Juni 2026.
-      </p>
-    );
+    return <p className={s.empty}>Noch keine Ergebnisse. Das Turnier startet am 11. Juni 2026.</p>;
   }
   return (
     <div>
@@ -95,24 +93,20 @@ function RecentResults({ results, myTipsMap }) {
         const tip = myTipsMap[m._id];
         const pts = tip ? calcPoints({ h: tip.h, a: tip.a }, m.result) : null;
         return (
-          <div key={m._id} className={s.rRow}>
-            <div className={s.rLeft}>
-              <span className={s.rFlag}>{m.homeFlag}</span>
-              <span className={s.rTeam}>{m.home}</span>
+          <div key={m._id} className={s.nmRow}>
+            <MatchRowTeams m={m} center={
               <span className={s.rScore}>{m.result.h}:{m.result.a}</span>
-              <span className={s.rTeam}>{m.away}</span>
-              <span className={s.rFlag}>{m.awayFlag}</span>
-            </div>
-            <div className={s.rRight}>
+            } />
+            <div className={s.nmFooter}>
               {tip ? (
-                <>
-                  <div className={s.rTipLbl}>{tip.h}:{tip.a}</div>
-                  <span className={`${s.rPts} ${PTS_CLS[pts] ?? ""}`}>
-                    {PTS_LBL[pts]} · {pts} Pkt
-                  </span>
-                </>
+                <span className={s.nmDate}>Tipp: {tip.h}:{tip.a}</span>
               ) : (
-                <span className={s.rTipLbl} style={{ fontStyle: "italic" }}>Kein Tipp</span>
+                <span className={s.nmDate} style={{ fontStyle: "italic" }}>Kein Tipp</span>
+              )}
+              {tip && (
+                <span className={`${s.rPts} ${PTS_CLS[pts] ?? ""}`}>
+                  {PTS_LBL[pts]} · {pts} Pkt
+                </span>
               )}
             </div>
           </div>
@@ -225,7 +219,7 @@ function Rules() {
       <div className={s.ruleExtra}>
         <div className={s.ruleExtraRow}>
           <span className={s.ruleExtraIcon}>⏰</span>
-          <span>Tipps müssen <strong>60 Minuten vor Anpfiff</strong> abgegeben werden. Danach ist kein Tipp mehr möglich.</span>
+          <span>Tipps müssen <strong>60 Minuten vor Anpfiff</strong> abgegeben werden. Danach sind <strong>keine Änderungen</strong> mehr möglich.</span>
         </div>
         <div className={s.ruleExtraRow}>
           <span className={s.ruleExtraIcon}>👁</span>
@@ -233,7 +227,7 @@ function Rules() {
         </div>
         <div className={s.ruleExtraRow}>
           <span className={s.ruleExtraIcon}>⚠️</span>
-          <span>Verspätete Tipps können per Anfrage eingereicht werden – ein Admin muss sie genehmigen.</span>
+          <span>Wer bis zur Deadline noch <strong>keinen Tipp</strong> abgegeben hat, kann einen verspäteten Tipp einreichen – ein Admin muss ihn genehmigen. Bestehende Tipps können nach der Deadline <strong>nicht mehr geändert</strong> werden.</span>
         </div>
         <div className={s.ruleExtraRow}>
           <span className={s.ruleExtraIcon}>⏱️</span>
