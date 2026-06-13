@@ -2,19 +2,14 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
-import Nav from "../components/Nav";
 import { calcPoints } from "../lib/scoring";
 import { shortName } from "../lib/teamNames";
+import PageHeader from "../components/PageHeader";
 import s from "../styles/Page.module.css";
+import { PTS_LBL } from "../lib/constants";
+import { dayLabel, matchdayShort } from "../lib/format";
 
-const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
-const KO_SHORT   = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1 };
-const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
-
-function dayLabel(d) {
-  return KO_HEADERS[d] ?? `Spieltag ${d}`;
-}
 
 function AccuracyStrip({ matchdayStats }) {
   const active = matchdayStats.filter(d => d.tipped > 0);
@@ -35,7 +30,7 @@ function AccuracyStrip({ matchdayStats }) {
         {active.map(d => {
           const { bg, text } = chipColor(d);
           const pct = Math.round(d.pts / (d.tipped * 3) * 100);
-          const lbl = d.matchday <= 17 ? `T${d.matchday}` : (KO_SHORT[d.matchday] ?? `T${d.matchday}`);
+          const lbl = matchdayShort(d.matchday);
           return (
             <div key={d.matchday} style={{
               background: bg, borderRadius: 8, padding: "6px 10px",
@@ -84,16 +79,13 @@ export default function StatsPage({ users, selectedUser, rank, totalPlayers, mat
     <>
       <Head><title>Details – WM Tippspiel</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
 
-          {/* header */}
-          <div className={s.ph} style={{ marginBottom: 18 }}>
-            <div className={s.ptitle}><span>DETAILS</span></div>
+          <PageHeader style={{ marginBottom: 18 }} right={
             <Link href="/rangliste" style={{ fontSize: "0.82rem", color: "var(--gold)", textDecoration: "none", alignSelf: "center" }}>
               ← Rangliste
             </Link>
-          </div>
+          }><span>DETAILS</span></PageHeader>
 
           {/* user selector */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: 5, marginBottom: 22 }}>
@@ -201,25 +193,11 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
   if (!session) return { redirect: { destination: "/login", permanent: false } };
 
-  const { connectDB } = await import("../lib/db");
-  const { default: User }  = await import("../models/User");
-  const { default: Match } = await import("../models/Match");
-  const { default: Tip }   = await import("../models/Tip");
-
-  await connectDB();
+  const { getLeaderboardBase } = await import("../lib/leaderboard");
+  const { users: allUsers, finishedMatches, tips: allTips, tipMap, matchdays } = await getLeaderboardBase();
 
   const selfId       = session.user.id;
   const viewedUserId = context.query.user ?? selfId;
-
-  const [allUsers, finishedMatches, allTips] = await Promise.all([
-    User.find().sort({ username: 1 }).lean(),
-    Match.find({ finished: true }).sort({ kickoff: 1 }).lean(),
-    Tip.find({ lateStatus: { $in: [null, "approved"] } }).lean(),
-  ]);
-
-  // rank board
-  const tipMap = {};
-  for (const t of allTips) tipMap[`${t.user}-${t.match}`] = t;
 
   const board = allUsers.map(u => {
     let pts = 0;
@@ -237,9 +215,6 @@ export async function getServerSideProps(context) {
   for (const t of allTips) {
     if (t.user.toString() === viewedUserId) userTipMap[t.match.toString()] = t;
   }
-
-  const matchdaySet = new Set(finishedMatches.map(m => m.matchday));
-  const matchdays   = [...matchdaySet].sort((a, b) => a - b);
 
   let totalCorrect = 0, totalDiff = 0, totalTendency = 0;
 
@@ -279,7 +254,7 @@ export async function getServerSideProps(context) {
 
   return {
     props: {
-      users: allUsers.map(u => ({ id: u._id.toString(), name: u.username })),
+      users: [...allUsers].sort((a, b) => a.username.localeCompare(b.username)).map(u => ({ id: u._id.toString(), name: u.username })),
       selectedUser: { id: viewedUserId, name: selectedUser?.username ?? "" },
       rank,
       totalPlayers: allUsers.length,

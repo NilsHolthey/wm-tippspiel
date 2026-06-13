@@ -1,0 +1,63 @@
+.rankUp   { font-size: 0.58rem; font-weight: 700; color: var(--green); margin-left: 3px; vertical-align: middle; }
+.rankDown { font-size: 0.58rem; font-weight: 700; color: #f87171;      margin-left: 3px; vertical-align: middle; }
+
+.lbList { display: flex; flex-direction: column; gap: 8px; }
+
+.lbCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.lbCardOpen {
+  border-color: rgba(201,168,76,0.38);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.28), 0 0 0 1px rgba(201,168,76,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.lbRowMe { background: linear-gradient(145deg, rgba(201,168,76,0.1) 0%, rgba(201,168,76,0.04) 100%); }
+
+.lbRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.lbRow:active { background: rgba(255,255,255,0.06); }
+
+.lbDetail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 16px 14px;
+}
+
+.lbRank {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.lbInfo { flex: 1; min-width: 0; }
+.lbName { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+.lbYou { font-size: 0.65rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--gold); background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); border-radius: 4px; padding: 1px 5px; font-weight: 600; }
+.lbBar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+.lbBarFill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+.lbPts {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  flex-shrink: 0;
+  min-width: 44px;
+  text-align: right;
+}

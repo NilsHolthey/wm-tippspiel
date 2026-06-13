@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../lib/auth";
 import { shortName } from "../../../lib/teamNames";
 
-const LOCK_MIN = 60;
+import { LOCK_MIN } from "../../../lib/constants";
+
 function isDeadlinePast(kickoff) {
   return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
 }

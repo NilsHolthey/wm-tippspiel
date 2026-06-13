@@ -3,9 +3,10 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
-import Nav from "../components/Nav";
 import PointsChart from "../components/PointsChart";
+import PageHeader from "../components/PageHeader";
 import s from "../styles/Page.module.css";
+import lb from "../styles/Leaderboard.module.css";
 import { calcPoints } from "../lib/scoring";
 
 const RANK_COLORS = { 1: "#ceac4d", 2: "#9ba4ae", 3: "#b07040" };
@@ -46,14 +47,11 @@ export default function RanglistePage({ board, matchdays }) {
 
   if (status === "loading") return (
     <div className={s.app}>
-      <Nav />
       <div className={s.wrap}>
-        <div className={s.ph} style={{ marginBottom: 22 }}>
-          <div className={s.skeletonBlock} style={{ width: 140, height: 32, borderRadius: 6 }} />
-        </div>
-        <div className={s.lbList}>
+        <PageHeader.Skeleton style={{ marginBottom: 22 }} width={140} />
+        <div className={lb.lbList}>
           {[...Array(7)].map((_, i) => (
-            <div key={i} className={s.lbCard} style={{ padding: "13px 16px", display: "flex", alignItems: "center", gap: 14 }}>
+            <div key={i} className={lb.lbCard} style={{ padding: "13px 16px", display: "flex", alignItems: "center", gap: 14 }}>
               <div className={s.skeletonBlock} style={{ width: 26, height: 22, borderRadius: 4 }} />
               <div style={{ flex: 1 }}>
                 <div className={s.skeletonBlock} style={{ width: "55%", height: 13, borderRadius: 4, marginBottom: 9 }} />
@@ -74,27 +72,20 @@ export default function RanglistePage({ board, matchdays }) {
     <>
       <Head><title>Rangliste – WM Tippspiel</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
-          <div className={s.ph} style={{ marginBottom: 22 }}>
-            <div className={s.ptitle}><span>RANGLISTE</span></div>
-            <button
-              onClick={() => router.push("/stats")}
-              className={s.mdPill}
-              style={{ alignSelf: "center" }}
-            >
-              Details
-            </button>
-            {matchdays?.length >= 2 && (
-              <button
-                onClick={() => setShowChart(v => !v)}
-                className={`${s.mdPill}${showChart ? " " + s.mdPillActive : ""}`}
-                style={{ alignSelf: "center" }}
-              >
-                Verlauf
-              </button>
-            )}
-          </div>
+          <PageHeader style={{ marginBottom: 22 }} right={
+            <div style={{ display: "flex", gap: 8, alignSelf: "center" }}>
+              <button onClick={() => router.push("/stats")} className={s.mdPill}>Details</button>
+              {matchdays?.length >= 2 && (
+                <button
+                  onClick={() => setShowChart(v => !v)}
+                  className={`${s.mdPill}${showChart ? " " + s.mdPillActive : ""}`}
+                >
+                  Verlauf
+                </button>
+              )}
+            </div>
+          }><span>RANGLISTE</span></PageHeader>
 
           {showChart && (
             <div className={s.homeSec} style={{ marginBottom: 18 }}>
@@ -103,7 +94,7 @@ export default function RanglistePage({ board, matchdays }) {
             </div>
           )}
 
-          <div className={s.lbList}>
+          <div className={lb.lbList}>
             {board.map((p, i) => {
               const isMe = p.id === currentUserId;
               const isOpen = expanded.has(p.id);
@@ -112,13 +103,13 @@ export default function RanglistePage({ board, matchdays }) {
               return (
                 <motion.div
                   key={p.id}
-                  className={`${s.lbCard}${isMe ? " " + s.lbRowMe : ""}${isOpen ? " " + s.lbCardOpen : ""}`}
+                  className={`${lb.lbCard}${isMe ? " " + lb.lbRowMe : ""}${isOpen ? " " + lb.lbCardOpen : ""}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.22, ease: "easeOut", delay: i * 0.05 }}
                 >
                   <div
-                    className={s.lbRow}
+                    className={lb.lbRow}
                     onClick={() => setExpanded(prev => {
                       const next = new Set(prev);
                       isOpen ? next.delete(p.id) : next.add(p.id);
@@ -126,18 +117,18 @@ export default function RanglistePage({ board, matchdays }) {
                     })}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, width: 42 }}>
-                      <span className={s.lbRank} style={{ color: rankColor }}>{i + 1}</span>
-                      {rankChanges[p.id] > 0 && <span className={s.rankUp}>▲{rankChanges[p.id]}</span>}
-                      {rankChanges[p.id] < 0 && <span className={s.rankDown}>▼{Math.abs(rankChanges[p.id])}</span>}
+                      <span className={lb.lbRank} style={{ color: rankColor }}>{i + 1}</span>
+                      {rankChanges[p.id] > 0 && <span className={lb.rankUp}>▲{rankChanges[p.id]}</span>}
+                      {rankChanges[p.id] < 0 && <span className={lb.rankDown}>▼{Math.abs(rankChanges[p.id])}</span>}
                     </div>
-                    <div className={s.lbInfo}>
-                      <div className={s.lbName}>
+                    <div className={lb.lbInfo}>
+                      <div className={lb.lbName}>
                         {p.name}
-                        {isMe && <span className={s.lbYou}>Du</span>}
+                        {isMe && <span className={lb.lbYou}>Du</span>}
                       </div>
-                      <div className={s.lbBar}>
+                      <div className={lb.lbBar}>
                         <div
-                          className={s.lbBarFill}
+                          className={lb.lbBarFill}
                           style={{
                             width: `${pct}%`,
                             background: i === 0
@@ -147,7 +138,7 @@ export default function RanglistePage({ board, matchdays }) {
                         />
                       </div>
                     </div>
-                    <span className={s.lbPts} style={{ color: rankColor }}>{p.pts}</span>
+                    <span className={lb.lbPts} style={{ color: rankColor }}>{p.pts}</span>
                     <svg
                       width="14" height="14" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -166,7 +157,7 @@ export default function RanglistePage({ board, matchdays }) {
                         transition={{ duration: 0.2, ease: "easeInOut" }}
                         style={{ overflow: "hidden" }}
                       >
-                        <div className={s.lbDetail}>
+                        <div className={lb.lbDetail}>
                           <span className={`${s.legendChip} ${s.pts3}`}>{p.correct} × 3 Pkt</span>
                           <span className={`${s.legendChip} ${s.pts2}`}>{p.diff} × 2 Pkt</span>
                           <span className={`${s.legendChip} ${s.pts1}`}>{p.tendency} × 1 Pkt</span>
@@ -190,22 +181,8 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
   if (!session) return { redirect: { destination: "/login", permanent: false } };
   try {
-    const { connectDB } = await import("../lib/db");
-    const { default: User } = await import("../models/User");
-    const { default: Match } = await import("../models/Match");
-    const { default: Tip } = await import("../models/Tip");
-
-    await connectDB();
-
-    const users = await User.find().lean();
-    const finishedMatches = await Match.find({ finished: true }).sort({ kickoff: 1 }).lean();
-    const tips = await Tip.find({ lateStatus: { $in: [null, "approved"] } }).lean();
-
-    const tipMap = {};
-    for (const t of tips) tipMap[`${t.user}-${t.match}`] = t;
-
-    const matchdaySet = new Set(finishedMatches.map(m => m.matchday));
-    const matchdays = [...matchdaySet].sort((a, b) => a - b);
+    const { getLeaderboardBase } = await import("../lib/leaderboard");
+    const { users, finishedMatches, tipMap, matchdays } = await getLeaderboardBase();
 
     const board = users.map(u => {
       let pts = 0, correct = 0, diff = 0, tendency = 0, tipped = 0;

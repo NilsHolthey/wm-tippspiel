@@ -6,13 +6,13 @@ import { calcPoints } from "../lib/scoring";
 import { calcStandings } from "../lib/standings";
 import { IconWarning, IconCheck } from "./Icons";
 import { haptic } from "../utils/haptic";
+import { LOCK_MIN } from "../lib/constants";
+import { dayLabel } from "../lib/format";
 import s from "./MatchSheet.module.css";
 
-const LOCK_MIN = 60;
 function isDeadlinePast(kickoff) {
   return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
 }
-const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
 
 const TableIcon = () => (
   <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
@@ -132,7 +132,7 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
   const kickoffDate = new Date(match.kickoff);
   const dateStr = kickoffDate.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })
     + " · " + kickoffDate.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-  const phaseLabel = KO_HEADERS[match.matchday] ?? `Spieltag ${match.matchday}`;
+  const phaseLabel = dayLabel(match.matchday);
 
   return (
     <>

@@ -2,19 +2,18 @@ import { useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
-import Nav from "../../components/Nav";
 import Stepper from "../../components/MatchCard/Stepper";
 import { IconWarning, IconCheck } from "../../components/Icons";
 import s from "../../styles/Page.module.css";
+import m from "../../styles/MatchTipPage.module.css";
 import { calcPoints } from "../../lib/scoring";
 import { shortName } from "../../lib/teamNames";
+import { LOCK_MIN } from "../../lib/constants";
+import { dayLabel } from "../../lib/format";
 
-const LOCK_MIN = 60;
 function isDeadlinePast(kickoff) {
   return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
 }
-
-const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
 
 export default function MatchTipPage({ match, myTipInit, otherTips, prevId, nextId }) {
   const router = useRouter();
@@ -50,53 +49,52 @@ export default function MatchTipPage({ match, myTipInit, otherTips, prevId, next
   const kickoffDate = new Date(match.kickoff);
   const dateStr = kickoffDate.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })
     + " · " + kickoffDate.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-  const phaseLabel = KO_HEADERS[match.matchday] ?? `Spieltag ${match.matchday}`;
+  const phaseLabel = dayLabel(match.matchday);
 
   return (
     <>
       <Head><title>{match.home} vs {match.away} – Tipp</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
 
-          <div className={s.mpNav}>
-            <button className={s.mpBack} onClick={() => router.push("/tipps")}>← Tipps</button>
-            <div className={s.mpNavArrows}>
-              <button className={s.mpArrow} onClick={() => router.push(`/tipps/${prevId}`)} disabled={!prevId}>←</button>
-              <button className={s.mpArrow} onClick={() => router.push(`/tipps/${nextId}`)} disabled={!nextId}>→</button>
+          <div className={m.mpNav}>
+            <button className={m.mpBack} onClick={() => router.push("/tipps")}>← Tipps</button>
+            <div className={m.mpNavArrows}>
+              <button className={m.mpArrow} onClick={() => router.push(`/tipps/${prevId}`)} disabled={!prevId}>←</button>
+              <button className={m.mpArrow} onClick={() => router.push(`/tipps/${nextId}`)} disabled={!nextId}>→</button>
             </div>
           </div>
 
-          <div className={s.mpMeta}>
-            <span className={s.mpDay}>{phaseLabel}</span>
-            {match.group && <span className={s.mpGroup}>Gruppe {match.group}</span>}
-            <span className={s.mpDate}>{dateStr}</span>
+          <div className={m.mpMeta}>
+            <span className={m.mpDay}>{phaseLabel}</span>
+            {match.group && <span className={m.mpGroup}>Gruppe {match.group}</span>}
+            <span className={m.mpDate}>{dateStr}</span>
           </div>
 
-          <div className={s.mpTeams}>
-            <div className={s.mpTeamCol}>
-              <span className={s.mpFlag}>{match.homeFlag}</span>
-              <span className={s.mpName}>{match.home}</span>
+          <div className={m.mpTeams}>
+            <div className={m.mpTeamCol}>
+              <span className={m.mpFlag}>{match.homeFlag}</span>
+              <span className={m.mpName}>{match.home}</span>
               {match.homeForm?.length > 0 && (
-                <div className={s.mpForm}>
+                <div className={m.mpForm}>
                   {match.homeForm.map((r, i) => (
-                    <span key={i} className={`${s.mpFormDot} ${s[`mpForm${r}`]}`}>{r}</span>
+                    <span key={i} className={`${m.mpFormDot} ${m[`mpForm${r}`]}`}>{r}</span>
                   ))}
                 </div>
               )}
             </div>
-            <div className={s.mpScore}>
+            <div className={m.mpScore}>
               {match.finished
-                ? <span className={s.mpResult}>{match.result.h} : {match.result.a}</span>
-                : <span className={s.mpVs}>–:–</span>}
+                ? <span className={m.mpResult}>{match.result.h} : {match.result.a}</span>
+                : <span className={m.mpVs}>–:–</span>}
             </div>
-            <div className={`${s.mpTeamCol} ${s.mpTeamAway}`}>
-              <span className={s.mpFlag}>{match.awayFlag}</span>
-              <span className={s.mpName}>{match.away}</span>
+            <div className={`${m.mpTeamCol} ${m.mpTeamAway}`}>
+              <span className={m.mpFlag}>{match.awayFlag}</span>
+              <span className={m.mpName}>{match.away}</span>
               {match.awayForm?.length > 0 && (
-                <div className={s.mpForm}>
+                <div className={m.mpForm}>
                   {match.awayForm.map((r, i) => (
-                    <span key={i} className={`${s.mpFormDot} ${s[`mpForm${r}`]}`}>{r}</span>
+                    <span key={i} className={`${m.mpFormDot} ${m[`mpForm${r}`]}`}>{r}</span>
                   ))}
                 </div>
               )}
@@ -104,28 +102,28 @@ export default function MatchTipPage({ match, myTipInit, otherTips, prevId, next
           </div>
 
           {isLate && (
-            <div className={s.mpLate} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className={m.mpLate} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <IconWarning size={15} style={{ flexShrink: 0 }} />
               Deadline abgelaufen — Admin muss diesen Tipp bestätigen
             </div>
           )}
 
           {!match.finished ? (
-            <div className={s.mpTipping}>
-              <div className={s.mpTipLabel}>Dein Tipp</div>
-              <div className={s.mpSteppers}>
-                <div className={s.mpStepGroup}>
-                  <span className={s.mpStepLbl}>{match.home}</span>
+            <div className={m.mpTipping}>
+              <div className={m.mpTipLabel}>Dein Tipp</div>
+              <div className={m.mpSteppers}>
+                <div className={m.mpStepGroup}>
+                  <span className={m.mpStepLbl}>{match.home}</span>
                   <Stepper value={h} onChange={setH} />
                 </div>
-                <span className={s.mpColon}>:</span>
-                <div className={s.mpStepGroup}>
-                  <span className={s.mpStepLbl}>{match.away}</span>
+                <span className={m.mpColon}>:</span>
+                <div className={m.mpStepGroup}>
+                  <span className={m.mpStepLbl}>{match.away}</span>
                   <Stepper value={a} onChange={setA} />
                 </div>
               </div>
               <button
-                className={`${s.mpSubmit}${isLate ? " " + s.mpSubmitLate : ""}${done ? " " + s.mpSubmitDone : ""}`}
+                className={`${m.mpSubmit}${isLate ? " " + m.mpSubmitLate : ""}${done ? " " + m.mpSubmitDone : ""}`}
                 onClick={submit}
                 disabled={done || saving}
               >
@@ -133,18 +131,18 @@ export default function MatchTipPage({ match, myTipInit, otherTips, prevId, next
               </button>
             </div>
           ) : (
-            <div className={s.mpFinished}>Spiel beendet</div>
+            <div className={m.mpFinished}>Spiel beendet</div>
           )}
 
           {tipsVisible && otherTips.length > 0 && (
-            <div className={s.mpOthers}>
-              <div className={s.mpOthersTitle}>Alle Tipps</div>
+            <div className={m.mpOthers}>
+              <div className={m.mpOthersTitle}>Alle Tipps</div>
               {otherTips.map((o, i) => (
-                <div key={i} className={s.mpOtherRow}>
-                  <span className={s.mpOtherName}>{o.name}</span>
-                  <span className={s.mpOtherTip}>{o.h} : {o.a}</span>
+                <div key={i} className={m.mpOtherRow}>
+                  <span className={m.mpOtherName}>{o.name}</span>
+                  <span className={m.mpOtherTip}>{o.h} : {o.a}</span>
                   {match.finished && (
-                    <span className={`${s.mpOtherPts} ${s[`mpPts${calcPoints({ h: o.h, a: o.a }, match.result)}`]}`}>
+                    <span className={`${m.mpOtherPts} ${m[`mpPts${calcPoints({ h: o.h, a: o.a }, match.result)}`]}`}>
                       {calcPoints({ h: o.h, a: o.a }, match.result)} Pkt
                     </span>
                   )}

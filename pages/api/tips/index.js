@@ -5,10 +5,10 @@ import Match from "../../../models/Match";
 import Tip from "../../../models/Tip";
 import LateRequest from "../../../models/LateRequest";
 
-const LOCK_MINUTES = 60;
+import { LOCK_MIN } from "../../../lib/constants";
 
 function isLocked(kickoff) {
-  return Date.now() >= new Date(kickoff).getTime() - LOCK_MINUTES * 60 * 1000;
+  return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
 }
 
 export default async function handler(req, res) {

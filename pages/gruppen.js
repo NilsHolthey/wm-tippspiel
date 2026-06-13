@@ -3,52 +3,45 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
-import useSWR from "swr";
+import { useTippsData } from "../hooks/useTippsData";
 import { shortName } from "../lib/teamNames";
 import { calcStandings } from "../lib/standings";
 import { calcPoints } from "../lib/scoring";
-import Nav from "../components/Nav";
 import MatchSheet from "../components/MatchSheet";
 import KOBracket from "../components/KOBracket";
+import PageHeader from "../components/PageHeader";
 import s from "../styles/Page.module.css";
-
-const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
-const fetcher = (url) => fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json(); });
-
-
-function formatDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })
-    + " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-}
+import g from "../styles/Gruppen.module.css";
+import { GROUPS } from "../lib/constants";
+import { formatDate } from "../lib/format";
 
 function StandingsTable({ rows }) {
   return (
-    <div className={s.grpTable}>
-      <div className={s.grpRow + " " + s.grpHead}>
-        <span className={s.grpTeamCol} />
-        <span className={s.grpNum}>Sp</span>
-        <span className={s.grpNum}>S</span>
-        <span className={s.grpNum}>U</span>
-        <span className={s.grpNum}>N</span>
-        <span className={s.grpNum}>T</span>
-        <span className={s.grpNum}>±</span>
-        <span className={`${s.grpNum} ${s.grpPts}`}>P</span>
+    <div className={g.grpTable}>
+      <div className={g.grpRow + " " + g.grpHead}>
+        <span className={g.grpTeamCol} />
+        <span className={g.grpNum}>Sp</span>
+        <span className={g.grpNum}>S</span>
+        <span className={g.grpNum}>U</span>
+        <span className={g.grpNum}>N</span>
+        <span className={g.grpNum}>T</span>
+        <span className={g.grpNum}>±</span>
+        <span className={`${g.grpNum} ${g.grpPts}`}>P</span>
       </div>
       {rows.map((r, i) => (
-        <div key={r.team} className={`${s.grpRow}${i < 2 ? " " + s.grpQual : ""}`}>
-          <span className={s.grpTeamCol}>
-            <span className={s.grpRank}>{i + 1}</span>
-            <span className={s.grpFlag}>{r.flag}</span>
-            <span className={s.grpTeam}>{r.team}</span>
+        <div key={r.team} className={`${g.grpRow}${i < 2 ? " " + g.grpQual : ""}`}>
+          <span className={g.grpTeamCol}>
+            <span className={g.grpRank}>{i + 1}</span>
+            <span className={g.grpFlag}>{r.flag}</span>
+            <span className={g.grpTeam}>{r.team}</span>
           </span>
-          <span className={s.grpNum}>{r.played}</span>
-          <span className={s.grpNum}>{r.won}</span>
-          <span className={s.grpNum}>{r.drawn}</span>
-          <span className={s.grpNum}>{r.lost}</span>
-          <span className={s.grpNum}>{r.gf}:{r.ga}</span>
-          <span className={s.grpNum}>{r.gf - r.ga > 0 ? "+" : ""}{r.gf - r.ga}</span>
-          <span className={`${s.grpNum} ${s.grpPts}`}>{r.pts}</span>
+          <span className={g.grpNum}>{r.played}</span>
+          <span className={g.grpNum}>{r.won}</span>
+          <span className={g.grpNum}>{r.drawn}</span>
+          <span className={g.grpNum}>{r.lost}</span>
+          <span className={g.grpNum}>{r.gf}:{r.ga}</span>
+          <span className={g.grpNum}>{r.gf - r.ga > 0 ? "+" : ""}{r.gf - r.ga}</span>
+          <span className={`${g.grpNum} ${g.grpPts}`}>{r.pts}</span>
         </div>
       ))}
     </div>
@@ -60,7 +53,7 @@ const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1 };
 function MatchList({ matches, onOpen, myTipsMap, otherTipsMap }) {
   if (!matches.length) return null;
   return (
-    <div className={s.grpMatches}>
+    <div className={g.grpMatches}>
       {matches.map(m => {
         const tip = myTipsMap?.[m._id];
         const hasTip = tip && tip.lateStatus !== "pending";
@@ -68,17 +61,17 @@ function MatchList({ matches, onOpen, myTipsMap, otherTipsMap }) {
         return (
           <div
             key={m._id}
-            className={`${s.grpMatch}${m.finished ? " " + s.grpMatchDone : ""}`}
+            className={`${g.grpMatch}${m.finished ? " " + g.grpMatchDone : ""}`}
             onClick={() => onOpen(m._id)}
           >
-            <div className={s.grpMatchMeta}>
-              <span className={s.grpMatchDate}>{formatDate(m.kickoff)}</span>
+            <div className={g.grpMatchMeta}>
+              <span className={g.grpMatchDate}>{formatDate(m.kickoff)}</span>
               {hasTip && (() => {
                 const pts = m.finished ? calcPoints({ h: tip.h, a: tip.a }, m.result) : null;
-                const ptsCls = pts != null ? (PTS_CLS[pts] ?? s.grpMatchOtherMuted) : "";
+                const ptsCls = pts != null ? (PTS_CLS[pts] ?? g.grpMatchOtherMuted) : "";
                 return (
                   <span
-                    className={`${s.grpMatchTip} ${ptsCls}`}
+                    className={`${g.grpMatchTip} ${ptsCls}`}
                     style={pts == null ? { color: "var(--gold)" } : undefined}
                   >
                     Du {tip.h}:{tip.a}
@@ -86,25 +79,25 @@ function MatchList({ matches, onOpen, myTipsMap, otherTipsMap }) {
                 );
               })()}
             </div>
-            <div className={s.grpMatchTeams}>
-              <div className={s.grpMatchHome}>
-                <span className={s.grpMatchFlag}>{m.homeFlag}</span>
-                <span className={s.grpMatchName}>{m.home}</span>
+            <div className={g.grpMatchTeams}>
+              <div className={g.grpMatchHome}>
+                <span className={g.grpMatchFlag}>{m.homeFlag}</span>
+                <span className={g.grpMatchName}>{m.home}</span>
               </div>
               {m.finished
-                ? <span className={s.grpMatchScore}>{m.result.h} : {m.result.a}</span>
-                : <span className={s.grpMatchVs}>–:–</span>}
-              <div className={s.grpMatchAway}>
-                <span className={s.grpMatchName}>{m.away}</span>
-                <span className={s.grpMatchFlag}>{m.awayFlag}</span>
+                ? <span className={g.grpMatchScore}>{m.result.h} : {m.result.a}</span>
+                : <span className={g.grpMatchVs}>–:–</span>}
+              <div className={g.grpMatchAway}>
+                <span className={g.grpMatchName}>{m.away}</span>
+                <span className={g.grpMatchFlag}>{m.awayFlag}</span>
               </div>
             </div>
             {others.length > 0 && (
-              <div className={s.grpMatchOthers}>
+              <div className={g.grpMatchOthers}>
                 {others.map((o, i) => {
                   const pts = calcPoints({ h: o.h, a: o.a }, m.result);
                   return (
-                    <span key={i} className={`${s.grpMatchOtherChip} ${PTS_CLS[pts] ?? s.grpMatchOtherMuted}`}>
+                    <span key={i} className={`${g.grpMatchOtherChip} ${PTS_CLS[pts] ?? g.grpMatchOtherMuted}`}>
                       {o.name} {o.h}:{o.a}
                     </span>
                   );
@@ -125,28 +118,20 @@ export default function GruppenPage({ groups, standings, koMatches }) {
     if (status === "unauthenticated") router.replace("/login");
   }, [status, router]);
 
-  const { data: tipsData, mutate } = useSWR(
-    status === "authenticated" ? "/api/tipps/data" : null,
-    fetcher,
-    { revalidateOnFocus: true, dedupingInterval: 30000 }
-  );
-  const tipsMatches = tipsData?.matches ?? [];
-  const myTipsMap = tipsData?.myTipsMap ?? {};
-  const otherTipsMap = tipsData?.otherTipsMap ?? {};
+  const { matches: tipsMatches, myTipsMap, otherTipsMap, mutate } = useTippsData({
+    active: status === "authenticated",
+  });
 
   const [sheetId, setSheetId] = useState(null);
   const [view, setView] = useState("groups");
 
   if (status === "loading") return (
     <div className={s.app}>
-      <Nav />
       <div className={s.wrap}>
-        <div className={s.ph} style={{ marginBottom: 18 }}>
-          <div className={s.skeletonBlock} style={{ width: 120, height: 32, borderRadius: 6 }} />
-        </div>
-        <div className={s.grpGrid}>
+        <PageHeader.Skeleton style={{ marginBottom: 18 }} />
+        <div className={g.grpGrid}>
           {[...Array(6)].map((_, i) => (
-            <div key={i} className={s.grpCard}>
+            <div key={i} className={g.grpCard}>
               <div className={s.skeletonBlock} style={{ width: 80, height: 11, borderRadius: 4, marginBottom: 14 }} />
               {[...Array(4)].map((_, j) => (
                 <div key={j} className={s.skeletonBlock} style={{ height: 22, borderRadius: 4, marginBottom: 5 }} />
@@ -189,11 +174,8 @@ export default function GruppenPage({ groups, standings, koMatches }) {
     <>
       <Head><title>Gruppen – WM Tippspiel</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
-          <div className={s.ph} style={{ marginBottom: 18 }}>
-            <div className={s.ptitle}><span>GRUPPEN</span></div>
-          </div>
+          <PageHeader style={{ marginBottom: 18 }}><span>GRUPPEN</span></PageHeader>
 
           {/* view toggle */}
           <div className={s.mdNav} style={{ marginBottom: 22 }}>
@@ -212,16 +194,16 @@ export default function GruppenPage({ groups, standings, koMatches }) {
           </div>
 
           {view === "groups" ? (
-            <div className={s.grpGrid}>
+            <div className={g.grpGrid}>
               {GROUPS.filter(g => groups[g]).map((g, i) => (
                 <motion.div
                   key={g}
-                  className={s.grpCard}
+                  className={g.grpCard}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.28, ease: "easeOut", delay: i * 0.05 }}
                 >
-                  <div className={s.grpCardTitle}>Gruppe {g}</div>
+                  <div className={g.grpCardTitle}>Gruppe {g}</div>
                   <StandingsTable rows={standings[g] ?? []} />
                   <MatchList matches={groups[g]} onOpen={setSheetId} myTipsMap={myTipsMap} otherTipsMap={otherTipsMap} />
                 </motion.div>

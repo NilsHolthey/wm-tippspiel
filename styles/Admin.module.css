@@ -1,0 +1,69 @@
+.asec { background: var(--d2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+.asecTitle { font-size: 0.68rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.nbadge { background: var(--gold); border-radius: 99px; color: var(--dark); font-size: 0.62rem; font-weight: 700; padding: 1px 6px; }
+
+.lrrow { background: rgba(234,179,8,0.05); border: 1px solid rgba(234,179,8,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 11px 13px; margin-bottom: 7px; }
+.lrWho   { font-size: 0.88rem; font-weight: 600; }
+.lrMatch { font-size: 0.78rem; color: var(--muted); }
+.lrTip   { color: var(--yellow); font-weight: 700; }
+.lrTime  { font-size: 0.7rem; color: var(--muted); }
+.lrBtns  { display: flex; gap: 6px; }
+
+.btnOk {
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.35);
+  border-radius: 6px;
+  color: var(--green);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  padding: 5px 11px;
+  transition: background 0.15s;
+}
+.btnOk:hover { background: rgba(34,197,94,0.22); }
+
+.btnNo {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 6px;
+  color: #f87171;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  padding: 5px 11px;
+  transition: background 0.15s;
+}
+.btnNo:hover { background: rgba(239,68,68,0.16); }
+
+.arow { background: var(--d3); border: none; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+.arow:last-child { border-bottom: none; }
+.arowDone { border-left: 2px solid rgba(34,197,94,0.5); }
+.arowMatch { font-size: 0.88rem; }
+.arowEntry { display: flex; align-items: center; gap: 8px; }
+.arowColon { color: var(--muted); font-size: 1rem; }
+.arowSave {
+  background: var(--d4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--gold);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 5px 11px;
+  height: 36px;
+  transition: background 0.15s;
+}
+.arowSave:hover { background: var(--d5); }
+.arowDoneLabel { color: var(--green); font-size: 0.78rem; }
+.arowControls { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.arowControls .arowSave { width: 100%; }
+
+@media (max-width: 600px) {
+  .lrrow { flex-direction: column; align-items: stretch; }
+  .lrBtns { display: flex; gap: 8px; }
+  .btnOk, .btnNo { flex: 1; text-align: center; padding: 9px 8px; }
+
+  .arow { flex-direction: column; align-items: stretch; gap: 8px; }
+  .arowEntry { flex-wrap: wrap; }
+  .arowMatch { font-size: 0.82rem; }
+}
