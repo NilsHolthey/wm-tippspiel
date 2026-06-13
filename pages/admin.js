@@ -1,22 +1,12 @@
 import { useState } from "react";
 import Head from "next/head";
 import { getSession } from "next-auth/react";
-import Nav from "../components/Nav";
 import MiniStepper from "../components/MiniStepper";
 import { IconClock, IconUser, IconRefresh, IconHourglass, IconCheck, IconX } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
 import s from "../styles/Page.module.css";
-
-const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
-
-function dayLabel(d) {
-  return d <= 17 ? `Spieltag ${d}` : (KO_HEADERS[d] ?? `Spieltag ${d}`);
-}
-
-function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })
-    + " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-}
+import a from "../styles/Admin.module.css";
+import { dayLabel, formatDate } from "../lib/format";
 
 function AdminResultRow({ match }) {
   const [rH, setRH] = useState(match.result?.h ?? 0);
@@ -36,28 +26,28 @@ function AdminResultRow({ match }) {
   }
 
   return (
-    <div className={`${s.arow}${done ? " " + s.arowDone : ""}`}>
+    <div className={`${a.arow}${done ? " " + a.arowDone : ""}`}>
       <div style={{ minWidth: 0, flex: 1 }}>
         {match.kickoff && (
           <div style={{ fontSize: "0.68rem", color: "var(--muted)", marginBottom: 3 }}>
-            {fmtDate(match.kickoff)}{match.group ? ` · Gruppe ${match.group}` : ""}
+            {formatDate(match.kickoff)}{match.group ? ` · Gruppe ${match.group}` : ""}
           </div>
         )}
-        <div className={s.arowMatch}>
+        <div className={a.arowMatch}>
           {match.homeFlag} {match.home} – {match.away} {match.awayFlag}
         </div>
       </div>
-      <div className={s.arowControls}>
-        <div className={s.arowEntry}>
+      <div className={a.arowControls}>
+        <div className={a.arowEntry}>
           <MiniStepper value={rH} onChange={setRH} />
-          <span className={s.arowColon}>:</span>
+          <span className={a.arowColon}>:</span>
           <MiniStepper value={rA} onChange={setRA} />
         </div>
         {done
-          ? <div className={s.arowDoneLabel} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          ? <div className={a.arowDoneLabel} style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <IconCheck size={12} />{rH}:{rA} gespeichert
             </div>
-          : <button className={s.arowSave} onClick={save} disabled={saving}>
+          : <button className={a.arowSave} onClick={save} disabled={saving}>
               {saving ? "Speichert…" : "Speichern"}
             </button>
         }
@@ -87,7 +77,7 @@ function SyncSection() {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-      <button className={s.arowSave} onClick={sync} disabled={loading} style={{ height: "auto", padding: "8px 16px" }}>
+      <button className={a.arowSave} onClick={sync} disabled={loading} style={{ height: "auto", padding: "8px 16px" }}>
         {loading
           ? <><IconHourglass size={13} style={{ verticalAlign: "middle", marginRight: 5 }} />Synchronisiere…</>
           : <><IconRefresh size={13} style={{ verticalAlign: "middle", marginRight: 5 }} />Ergebnisse synchronisieren</>
@@ -150,49 +140,46 @@ export default function AdminPage({ matches, lateRequestsInit }) {
     <>
       <Head><title>Admin – WM Tippspiel</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
-          <div className={s.ph} style={{ marginBottom: 22 }}>
-            <div className={s.ptitle}><span>ADMIN</span></div>
-          </div>
+          <PageHeader style={{ marginBottom: 22 }}><span>ADMIN</span></PageHeader>
 
           {/* Late requests */}
-          <div className={s.asec}>
-            <div className={s.asecTitle}>
+          <div className={a.asec}>
+            <div className={a.asecTitle}>
               <IconClock size={14} />
               Verspätete Anfragen
-              {lateRequests.length > 0 && <span className={s.nbadge}>{lateRequests.length}</span>}
+              {lateRequests.length > 0 && <span className={a.nbadge}>{lateRequests.length}</span>}
             </div>
             {lateRequests.length === 0 ? (
               <p className={s.empty}>Keine offenen Anfragen.</p>
             ) : (
               lateRequests.map(r => (
-                <div key={r._id} className={s.lrrow}>
+                <div key={r._id} className={a.lrrow}>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div className={s.lrWho} style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                    <div className={a.lrWho} style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
                       <IconUser size={13} />
                       {r.user.username}
                     </div>
                     {r.match.kickoff && (
                       <div style={{ fontSize: "0.68rem", color: "var(--muted)", marginBottom: 2 }}>
-                        {fmtDate(r.match.kickoff)}
+                        {formatDate(r.match.kickoff)}
                       </div>
                     )}
-                    <div className={s.lrMatch}>
+                    <div className={a.lrMatch}>
                       {r.match.homeFlag} {r.match.home} – {r.match.away} {r.match.awayFlag}
                     </div>
                     <div style={{ display: "flex", gap: 10, marginTop: 4, alignItems: "center" }}>
-                      <span className={s.lrTip}>Tipp: {r.tip.h} : {r.tip.a}</span>
-                      <span className={s.lrTime}>
+                      <span className={a.lrTip}>Tipp: {r.tip.h} : {r.tip.a}</span>
+                      <span className={a.lrTime}>
                         {new Date(r.requestedAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr
                       </span>
                     </div>
                   </div>
-                  <div className={s.lrBtns}>
-                    <button className={s.btnOk} onClick={() => handleRequest(r._id, "approve")}>
+                  <div className={a.lrBtns}>
+                    <button className={a.btnOk} onClick={() => handleRequest(r._id, "approve")}>
                       <IconCheck size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />Genehmigen
                     </button>
-                    <button className={s.btnNo} onClick={() => handleRequest(r._id, "reject")}>
+                    <button className={a.btnNo} onClick={() => handleRequest(r._id, "reject")}>
                       <IconX size={13} style={{ verticalAlign: "middle", marginRight: 4 }} />Ablehnen
                     </button>
                   </div>
@@ -202,14 +189,14 @@ export default function AdminPage({ matches, lateRequestsInit }) {
           </div>
 
           {/* Sync — disabled: results don't arrive in time via openfootball */}
-          {/* <div className={s.asec}>
-            <div className={s.asecTitle}><IconRefresh size={14} /> Ergebnisse synchronisieren</div>
+          {/* <div className={a.asec}>
+            <div className={a.asecTitle}><IconRefresh size={14} /> Ergebnisse synchronisieren</div>
             <SyncSection />
           </div> */}
 
           {/* Results entry */}
-          <div className={s.asec}>
-            <div className={s.asecTitle}>
+          <div className={a.asec}>
+            <div className={a.asecTitle}>
               Ergebnisse eintragen
               <button
                 onClick={() => setFilterOpen(p => !p)}

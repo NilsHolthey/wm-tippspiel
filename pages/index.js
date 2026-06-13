@@ -4,12 +4,14 @@ import Link from "next/link";
 import { shortName } from "../lib/teamNames";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
-import Nav from "../components/Nav";
 import { IconTrophy, IconSoccer, IconBarChart, IconList, IconClock } from "../components/Icons";
 import s from "../styles/Page.module.css";
+import h from "../styles/Home.module.css";
 import { calcPoints } from "../lib/scoring";
+import { LOCK_MIN, PTS_LBL } from "../lib/constants";
+import { formatDate } from "../lib/format";
+
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: null };
-const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
 
 function calcStandings(matches) {
   const groups = {};
@@ -38,23 +40,17 @@ function calcStandings(matches) {
   return result;
 }
 
-function formatDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" }) +
-    " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) + " Uhr";
-}
-
 function MatchRowTeams({ m, center }) {
   return (
-    <div className={s.nmTeams}>
-      <div className={s.nmHome}>
-        <span className={s.nmFlag}>{m.homeFlag}</span>
-        <span className={s.nmName}>{m.home}</span>
+    <div className={h.nmTeams}>
+      <div className={h.nmHome}>
+        <span className={h.nmFlag}>{m.homeFlag}</span>
+        <span className={h.nmName}>{m.home}</span>
       </div>
       {center}
-      <div className={s.nmAway}>
-        <span className={s.nmName}>{m.away}</span>
-        <span className={s.nmFlag}>{m.awayFlag}</span>
+      <div className={h.nmAway}>
+        <span className={h.nmName}>{m.away}</span>
+        <span className={h.nmFlag}>{m.awayFlag}</span>
       </div>
     </div>
   );
@@ -67,13 +63,13 @@ function UpcomingMatches({ matches, myTipsMap }) {
       {matches.map(m => {
         const tip = myTipsMap[m._id];
         return (
-          <div key={m._id} className={s.nmRow}>
-            <MatchRowTeams m={m} center={<span className={s.nmVs}>–:–</span>} />
-            <div className={s.nmFooter}>
-              <span className={s.nmDate}>{formatDate(m.kickoff)}</span>
+          <div key={m._id} className={h.nmRow}>
+            <MatchRowTeams m={m} center={<span className={h.nmVs}>–:–</span>} />
+            <div className={h.nmFooter}>
+              <span className={h.nmDate}>{formatDate(m.kickoff)}</span>
               {tip
-                ? <span className={`${s.nmTip} ${s.nmTipYes}`}>{tip.h}:{tip.a}</span>
-                : <span className={`${s.nmTip} ${s.nmTipNo}`}>Kein Tipp</span>
+                ? <span className={`${h.nmTip} ${h.nmTipYes}`}>{tip.h}:{tip.a}</span>
+                : <span className={`${h.nmTip} ${h.nmTipNo}`}>Kein Tipp</span>
               }
             </div>
           </div>
@@ -93,18 +89,18 @@ function RecentResults({ results, myTipsMap }) {
         const tip = myTipsMap[m._id];
         const pts = tip ? calcPoints({ h: tip.h, a: tip.a }, m.result) : null;
         return (
-          <div key={m._id} className={s.nmRow}>
+          <div key={m._id} className={h.nmRow}>
             <MatchRowTeams m={m} center={
-              <span className={s.rScore}>{m.result.h}:{m.result.a}</span>
+              <span className={h.rScore}>{m.result.h}:{m.result.a}</span>
             } />
-            <div className={s.nmFooter}>
+            <div className={h.nmFooter}>
               {tip ? (
-                <span className={s.nmDate}>Tipp: {tip.h}:{tip.a}</span>
+                <span className={h.nmDate}>Tipp: {tip.h}:{tip.a}</span>
               ) : (
-                <span className={s.nmDate} style={{ fontStyle: "italic" }}>Kein Tipp</span>
+                <span className={h.nmDate} style={{ fontStyle: "italic" }}>Kein Tipp</span>
               )}
               {tip && (
-                <span className={`${s.rPts} ${PTS_CLS[pts] ?? ""}`}>
+                <span className={`${h.rPts} ${PTS_CLS[pts] ?? ""}`}>
                   {PTS_LBL[pts]} · {pts} Pkt
                 </span>
               )}
@@ -123,21 +119,21 @@ function MiniLeaderboard({ board, currentUserId }) {
   const showMe = myIdx >= 5 && myEntry;
 
   return (
-    <div className={s.miniBoard}>
+    <div className={h.miniBoard}>
       {top5.map((p, i) => (
-        <div key={p.id} className={`${s.mbRow}${p.id === currentUserId ? " " + s.mbRowMe : ""}`}>
-          <span className={s.mbRank}>{i + 1}</span>
-          <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
-          <span className={s.mbPts}>{p.pts}</span>
+        <div key={p.id} className={`${h.mbRow}${p.id === currentUserId ? " " + h.mbRowMe : ""}`}>
+          <span className={h.mbRank}>{i + 1}</span>
+          <span className={h.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
+          <span className={h.mbPts}>{p.pts}</span>
         </div>
       ))}
       {showMe && (
         <>
-          <div className={s.mbSep}>· · ·</div>
-          <div className={`${s.mbRow} ${s.mbRowMe}`}>
-            <span className={s.mbRank}>{myIdx + 1}</span>
-            <span className={s.mbName}>{myEntry.name} (Du)</span>
-            <span className={s.mbPts}>{myEntry.pts}</span>
+          <div className={h.mbSep}>· · ·</div>
+          <div className={`${h.mbRow} ${h.mbRowMe}`}>
+            <span className={h.mbRank}>{myIdx + 1}</span>
+            <span className={h.mbName}>{myEntry.name} (Du)</span>
+            <span className={h.mbPts}>{myEntry.pts}</span>
           </div>
         </>
       )}
@@ -147,12 +143,12 @@ function MiniLeaderboard({ board, currentUserId }) {
 
 function FullLeaderboard({ board, currentUserId }) {
   return (
-    <div className={s.miniBoard}>
+    <div className={h.miniBoard}>
       {board.map((p, i) => (
-        <div key={p.id} className={`${s.mbRow}${p.id === currentUserId ? " " + s.mbRowMe : ""}`}>
-          <span className={s.mbRank}>{i + 1}</span>
-          <span className={s.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
-          <span className={s.mbPts}>{p.pts}</span>
+        <div key={p.id} className={`${h.mbRow}${p.id === currentUserId ? " " + h.mbRowMe : ""}`}>
+          <span className={h.mbRank}>{i + 1}</span>
+          <span className={h.mbName}>{p.name}{p.id === currentUserId && " (Du)"}</span>
+          <span className={h.mbPts}>{p.pts}</span>
         </div>
       ))}
     </div>
@@ -169,16 +165,16 @@ function GroupsPreview({ standings, activeGroups }) {
           Alle →
         </Link>
       </div>
-      <div className={s.miniGrpGrid}>
+      <div className={h.miniGrpGrid}>
         {activeGroups.filter(g => standings[g]).map(g => (
-          <Link key={g} href="/gruppen" className={s.miniGrpCard}>
-            <div className={s.miniGrpTitle}>Gruppe {g}</div>
+          <Link key={g} href="/gruppen" className={h.miniGrpCard}>
+            <div className={h.miniGrpTitle}>Gruppe {g}</div>
             {standings[g].map((team, i) => (
-              <div key={team.team} className={`${s.miniGrpRow}${i < 2 ? " " + s.miniGrpQual : ""}`}>
-                <span className={s.miniGrpPos}>{i + 1}</span>
-                <span className={s.miniGrpFlag}>{team.flag}</span>
-                <span className={s.miniGrpName}>{team.team}</span>
-                <span className={s.miniGrpPts}>{team.pts}</span>
+              <div key={team.team} className={`${h.miniGrpRow}${i < 2 ? " " + h.miniGrpQual : ""}`}>
+                <span className={h.miniGrpPos}>{i + 1}</span>
+                <span className={h.miniGrpFlag}>{team.flag}</span>
+                <span className={h.miniGrpName}>{team.team}</span>
+                <span className={h.miniGrpPts}>{team.pts}</span>
               </div>
             ))}
           </Link>
@@ -193,44 +189,44 @@ function Rules() {
     <div className={s.homeSec}>
       <div className={s.homeSecTitle}><IconList size={14} /> Spielregeln</div>
 
-      <div className={s.rulesGrid}>
-        <div className={s.ruleCard}>
-          <div className={s.ruleCardTop}>
+      <div className={h.rulesGrid}>
+        <div className={h.ruleCard}>
+          <div className={h.ruleCardTop}>
             <span className={`${s.legendChip} ${s.pts3}`}>3 Punkte</span>
           </div>
-          <div className={s.ruleCardBody}>Richtiges Ergebnis – genaue Tore für beide Teams.</div>
+          <div className={h.ruleCardBody}>Richtiges Ergebnis – genaue Tore für beide Teams.</div>
         </div>
-        <div className={s.ruleCard}>
-          <div className={s.ruleCardTop}>
+        <div className={h.ruleCard}>
+          <div className={h.ruleCardTop}>
             <span className={`${s.legendChip} ${s.pts2}`}>2 Punkte</span>
           </div>
-          <div className={s.ruleCardBody}>Richtige Tordifferenz – nur bei Sieg oder Niederlage (nicht bei Unentschieden).</div>
+          <div className={h.ruleCardBody}>Richtige Tordifferenz – nur bei Sieg oder Niederlage (nicht bei Unentschieden).</div>
         </div>
-        <div className={s.ruleCard}>
-          <div className={s.ruleCardTop}>
+        <div className={h.ruleCard}>
+          <div className={h.ruleCardTop}>
             <span className={`${s.legendChip} ${s.pts1}`}>1 Punkt</span>
           </div>
-          <div className={s.ruleCardBody}>Richtige Tendenz – Sieg, Unentschieden oder Niederlage korrekt vorhergesagt.</div>
+          <div className={h.ruleCardBody}>Richtige Tendenz – Sieg, Unentschieden oder Niederlage korrekt vorhergesagt.</div>
         </div>
       </div>
 
-      <hr className={s.ruleDivider} />
+      <hr className={h.ruleDivider} />
 
-      <div className={s.ruleExtra}>
-        <div className={s.ruleExtraRow}>
-          <span className={s.ruleExtraIcon}>⏰</span>
+      <div className={h.ruleExtra}>
+        <div className={h.ruleExtraRow}>
+          <span className={h.ruleExtraIcon}>⏰</span>
           <span>Tipps müssen <strong>60 Minuten vor Anpfiff</strong> abgegeben werden. Danach sind <strong>keine Änderungen</strong> mehr möglich.</span>
         </div>
-        <div className={s.ruleExtraRow}>
-          <span className={s.ruleExtraIcon}>👁</span>
+        <div className={h.ruleExtraRow}>
+          <span className={h.ruleExtraIcon}>👁</span>
           <span>Die Tipps der anderen Spieler sind erst nach dem Ablauf der Deadline sichtbar.</span>
         </div>
-        <div className={s.ruleExtraRow}>
-          <span className={s.ruleExtraIcon}>⚠️</span>
+        <div className={h.ruleExtraRow}>
+          <span className={h.ruleExtraIcon}>⚠️</span>
           <span>Wer bis zur Deadline noch <strong>keinen Tipp</strong> abgegeben hat, kann einen verspäteten Tipp einreichen – ein Admin muss ihn genehmigen. Bestehende Tipps können nach der Deadline <strong>nicht mehr geändert</strong> werden.</span>
         </div>
-        <div className={s.ruleExtraRow}>
-          <span className={s.ruleExtraIcon}>⏱️</span>
+        <div className={h.ruleExtraRow}>
+          <span className={h.ruleExtraIcon}>⏱️</span>
           <span>Alle Tipps gelten für das Ergebnis nach <strong>90 Minuten</strong> – Verlängerung und Elfmeterschießen zählen nicht.</span>
         </div>
       </div>
@@ -244,22 +240,21 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
     <>
       <Head><title>WM Tippspiel 2026</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
 
           {todayUntipped > 0 && (
-            <Link href="/tipps" className={s.untippedBanner}>
+            <Link href="/tipps" className={h.untippedBanner}>
               <span>⚽ {todayUntipped} {todayUntipped === 1 ? "Spiel" : "Spiele"} heute noch ohne Tipp</span>
-              <span className={s.untippedCta}>Jetzt tippen →</span>
+              <span className={h.untippedCta}>Jetzt tippen →</span>
             </Link>
           )}
 
-          <div className={s.homeHero}>
-            <div className={s.homeTitle}>WM <span>TIPPSPIEL</span> 2026</div>
-            <div className={s.homeSub}>11. Juni – 19. Juli 2026 · USA, Kanada &amp; Mexiko</div>
+          <div className={h.homeHero}>
+            <div className={h.homeTitle}>WM <span>TIPPSPIEL</span> 2026</div>
+            <div className={h.homeSub}>11. Juni – 19. Juli 2026 · USA, Kanada &amp; Mexiko</div>
           </div>
 
-          <div className={s.homeGrid}>
+          <div className={h.homeGrid}>
             {/* left: upcoming */}
             <motion.div
               className={`${s.homeSec} ${s.homeSecLink}`}
@@ -285,8 +280,8 @@ export default function HomePage({ nextMatches, recentResults, board, myTipsMap,
                 <IconTrophy size={14} /> Rangliste
                 <span style={{ marginLeft: "auto", fontSize: "0.68rem", color: "var(--gold)" }}>Alle →</span>
               </div>
-              <div className={s.mobileOnly}><MiniLeaderboard board={board} currentUserId={currentUserId} /></div>
-              <div className={s.tabletUp}><FullLeaderboard board={board} currentUserId={currentUserId} /></div>
+              <div className={h.mobileOnly}><MiniLeaderboard board={board} currentUserId={currentUserId} /></div>
+              <div className={h.tabletUp}><FullLeaderboard board={board} currentUserId={currentUserId} /></div>
             </motion.div>
           </div>
 
@@ -420,7 +415,6 @@ export async function getServerSideProps(context) {
     : allStandingGroups
   ).sort(byNextMatch);
 
-  const LOCK_MIN = 60;
   const todayUntipped = rawToday.filter(m => {
     const deadline = new Date(m.kickoff).getTime() - LOCK_MIN * 60 * 1000;
     return deadline > now.getTime() && !myTipsMap[m._id.toString()];

@@ -1,3 +1,5 @@
+import { matchdayShort } from "../lib/format";
+
 export default function PointsChart({ board, matchdays, currentUserId }) {
   if (!matchdays || matchdays.length < 2) return null;
 
@@ -33,9 +35,8 @@ export default function PointsChart({ board, matchdays, currentUserId }) {
     return pts.map((v, i) => `${xOf(i)},${yOf(v)}`).join(" ");
   }
 
-  const KO_LABELS = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
   function xLabel(day) {
-    return KO_LABELS[day] ?? `T${day}`;
+    return matchdayShort(day);
   }
 
   const gridLevels = [0.25, 0.5, 0.75, 1];

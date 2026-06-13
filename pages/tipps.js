@@ -2,35 +2,26 @@ import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getSession } from "next-auth/react";
-import useSWR from "swr";
-import Nav from "../components/Nav";
+import { useTippsData } from "../hooks/useTippsData";
 import MatchCard from "../components/MatchCard/MatchCard";
 import MatchCardSkeleton from "../components/MatchCard/MatchCardSkeleton";
 import MatchSheet from "../components/MatchSheet";
 import { IconInbox, IconCheck } from "../components/Icons";
+import PageHeader from "../components/PageHeader";
+import EmptyState from "../components/EmptyState";
 import s from "../styles/Page.module.css";
 import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
 import { flushSync } from "react-dom";
 import { haptic } from "../utils/haptic";
-
-const KO_LABELS  = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
-const KO_HEADERS = { 18: "Runde der 32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 22: "Spiel um Platz 3", 23: "Finale" };
-
-const fetcher = (url) => fetch(url).then(r => { if (!r.ok) throw new Error(); return r.json(); });
+import { dayLabel, matchdayShort } from "../lib/format";
 
 export default function TippsPage({ initialData }) {
   const router = useRouter();
-  const { data } = useSWR("/api/tipps/data", fetcher, {
+  const { data, matches, defaultMatchday, otherTipsMap, tipStatusMap } = useTippsData({
     fallbackData: initialData ?? undefined,
-    revalidateOnFocus: true,
-    dedupingInterval: 30000,
   });
 
-  const matches = data?.matches ?? [];
-  const defaultMatchday = data?.defaultMatchday ?? 1;
   const [myTipsMap, setMyTipsMap] = useState(data?.myTipsMap ?? {});
-  const otherTipsMap = data?.otherTipsMap ?? {};
-  const tipStatusMap = data?.tipStatusMap ?? {};
 
   // sync myTipsMap when SWR data refreshes
   useEffect(() => {
@@ -153,7 +144,7 @@ export default function TippsPage({ initialData }) {
   const currentMatches = matches.filter(m => m.matchday === selected).sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
   const isGroupStage = selected <= 17;
   const groups = isGroupStage ? [...new Set(currentMatches.map(m => m.group))].filter(Boolean).sort() : null;
-  const sectionHeader = KO_HEADERS[selected] ?? `Spieltag ${selected}`;
+  const sectionHeader = dayLabel(selected);
 
   function renderCards(list) {
     return list.map((m, i) => (
@@ -175,19 +166,17 @@ export default function TippsPage({ initialData }) {
     <>
       <Head><title>Tipps – WM Tippspiel</title></Head>
       <div className={s.app}>
-        <Nav />
         <div className={s.wrap}>
-          <div className={s.ph}>
-            <div className={s.ptitle}>MEINE <span>TIPPS</span></div>
-            {allOpen.length > 0 && (
-              <div>
-                <div className={s.progLbl}>{tippedCount} / {allOpen.length} getippt</div>
-                <div className={s.progBar}>
-                  <div className={s.progFill} style={{ width: `${(tippedCount / allOpen.length) * 100}%` }} />
-                </div>
+          <PageHeader right={allOpen.length > 0 && (
+            <div>
+              <div className={s.progLbl}>{tippedCount} / {allOpen.length} getippt</div>
+              <div className={s.progBar}>
+                <div className={s.progFill} style={{ width: `${(tippedCount / allOpen.length) * 100}%` }} />
               </div>
-            )}
-          </div>
+            </div>
+          )}>
+            MEINE <span>TIPPS</span>
+          </PageHeader>
 
           <div className={s.mdNav} ref={mdNavRef}>
             {!data ? (
@@ -214,7 +203,7 @@ export default function TippsPage({ initialData }) {
                     className={`${s.mdPill}${d === selected ? " " + s.mdPillActive : ""}`}
                     onClick={() => { slideDir.current = d > selected ? 1 : -1; setSelected(d); }}
                   >
-                    {KO_LABELS[d] ?? `T${d}`}
+                    {matchdayShort(d)}
                   </button>
                 ))}
               </>
@@ -253,10 +242,9 @@ export default function TippsPage({ initialData }) {
               >
                 <div key={selected}>
                   {currentMatches.length === 0 ? (
-                    <div className={s.emptyState}>
-                      <IconInbox size={44} className={s.emptyIcon} style={{ color: "var(--muted)" }} />
-                      <p className={s.emptyTitle}>Keine Spiele an diesem Spieltag</p>
-                    </div>
+                    <EmptyState icon={<IconInbox size={44} style={{ color: "var(--muted)" }} />}>
+                      Keine Spiele an diesem Spieltag
+                    </EmptyState>
                   ) : isGroupStage ? (
                     groups?.map(g => {
                       const gMatches = currentMatches.filter(m => m.group === g);

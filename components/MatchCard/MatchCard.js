@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import s from "./MatchCard.module.css";
 import { calcPoints } from "../../lib/scoring";
 import { IconCheck, IconMinus, IconTrendUp, IconX, IconClock, IconHourglass, IconWarning } from "../Icons";
+import { LOCK_MIN, PTS_LBL } from "../../lib/constants";
 
 const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: s.pts0 };
-const PTS_LBL = { 3: "Treffer", 2: "Differenz", 1: "Tendenz", 0: "Daneben" };
 const PTS_ICO = { 3: IconCheck, 2: IconMinus, 1: IconTrendUp, 0: IconX };
 
 function PtsStrip({ points }) {
@@ -18,15 +18,13 @@ function PtsStrip({ points }) {
   );
 }
 
-const LOCK_MINUTES = 60;
-
 function isLocked(kickoff) {
-  return Date.now() >= new Date(kickoff).getTime() - LOCK_MINUTES * 60 * 1000;
+  return Date.now() >= new Date(kickoff).getTime() - LOCK_MIN * 60 * 1000;
 }
 
 function isUrgent(kickoff) {
   const ms = new Date(kickoff).getTime() - Date.now();
-  return ms > 0 && ms < LOCK_MINUTES * 60 * 1000;
+  return ms > 0 && ms < LOCK_MIN * 60 * 1000;
 }
 
 function formatKickoff(kickoff) {
