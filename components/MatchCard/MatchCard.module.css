@@ -98,23 +98,24 @@
   gap: 8px;
 }
 
-.stripTip { display: flex; align-items: center; gap: 6px; }
-.stripLbl { font-size: 0.7rem; color: var(--muted); }
-.stripVal { font-size: 0.88rem; font-weight: 700; }
+.stripTip { display: flex; align-items: center; gap: 8px; }
+.stripLbl { font-size: 0.72rem; color: var(--text); opacity: 0.55; letter-spacing: 0.03em; }
+.stripVal { font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; color: var(--gold); letter-spacing: 0.06em; line-height: 1; }
 .stripPts { font-size: 0.68rem; border-radius: 4px; padding: 2px 6px; font-weight: 500; }
 
-.pts3 { background: rgba(34,197,94,0.15);  color: var(--green); animation: badgePop 0.45s ease-out; }
-.pts2 { background: rgba(201,168,76,0.15); color: var(--gold); }
-.pts1 { background: rgba(234,179,8,0.15);  color: var(--yellow); }
-.pts0 { background: rgba(239,68,68,0.1);   color: #f87171; }
+.pts3 { background: var(--d4); border: 1px solid rgba(34,197,94,0.5);  color: var(--green);  animation: badgePop 0.45s ease-out; }
+.pts2 { background: var(--d4); border: 1px solid rgba(201,168,76,0.5); color: var(--gold); }
+.pts1 { background: var(--d4); border: 1px solid rgba(249,115,22,0.5); color: var(--orange); }
+.pts0 { background: var(--d4); border: 1px solid rgba(239,68,68,0.45); color: #f87171; }
 
 .noTipBadge  { font-size: 0.7rem; color: #f87171; font-style: italic; }
 .noChangeRow {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   color: #f87171;
   font-style: italic;
   padding: 6px 16px 8px;
-  border-top: 1px solid rgba(239,68,68,0.12);
+  background: var(--d3);
+  border-top: 1px solid rgba(239,68,68,0.15);
 }
 .lateBadge   { font-size: 0.7rem; color: var(--yellow); display: flex; align-items: center; gap: 4px; }
 .lateMuted   { color: var(--muted); font-weight: 400; }
@@ -156,6 +157,15 @@
   gap: 5px;
 }
 
+.othersGrid {
+  background: var(--d3);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  padding: 14px 12px 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 6px;
+}
+
 .othersLbl {
   font-size: 0.6rem;
   letter-spacing: 0.09em;
@@ -166,28 +176,36 @@
 }
 
 .otherChip {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 1px;
   background: var(--d4);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 5px;
-  padding: 2px 7px 2px 5px;
-  font-size: 0.68rem;
-  line-height: 1.5;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  padding: 6px 8px;
+  line-height: 1.3;
 }
 
 .otherName {
-  color: var(--muted);
-  font-size: 0.63rem;
+  color: var(--text);
+  font-size: 0.7rem;
 }
 
-.otherScore { font-weight: 700; }
+.otherScore {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--gold);
+}
 
 .otherPts {
-  font-size: 0.58rem;
+  position: absolute;
+  top: -7px;
+  right: -4px;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 1px 4px;
-  border-radius: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
   letter-spacing: 0.02em;
 }

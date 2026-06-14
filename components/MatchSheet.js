@@ -68,6 +68,9 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
   const hasTip = !!myTip && myTip.lateStatus !== "pending";
   const isLateChange = isLate && hasTip; // deadline passed + already has tip → no changes
   const tipsVisible = match.finished || (locked && hasTip);
+  const myPts = match.finished && myTip
+    ? calcPoints({ h: myTip.h, a: myTip.a }, match.result)
+    : null;
 
   async function submit() {
     setSaving(true);
@@ -325,22 +328,31 @@ export default function MatchSheet({ match, myTip: myTipProp, otherTips = [], gr
               {done ? <><IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />Gespeichert!</> : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
             </button>
           </div>
+        ) : myTip ? (
+          <div className={s.mpOwnTipDisplay}>
+            <span className={s.mpOwnTipLbl}>Dein Tipp</span>
+            <span className={s.mpOwnTipScore}>{myTip.h} : {myTip.a}</span>
+            {myPts != null && (
+              <span className={`${s.mpOwnTipPts} ${s[`mpPts${myPts}`]}`}>{myPts} Pkt</span>
+            )}
+          </div>
         ) : (
-          <div className={s.mpFinished}>Spiel beendet</div>
+          <div className={s.mpFinished}>
+            {match.finished ? "Spiel beendet" : "Deadline abgelaufen – keine Änderung möglich"}
+          </div>
         )}
 
         {tipsVisible && otherTips.length > 0 && (
           <div className={s.mpOthers}>
-            <div className={s.mpOthersTitle}>Alle Tipps</div>
+            <div className={s.mpOthersTitle}>Andere Tipps</div>
             {otherTips.map((o, i) => (
               <div key={i} className={s.mpOtherRow}>
                 <span className={s.mpOtherName}>{o.name}</span>
-                <span className={s.mpOtherTip}>{o.h} : {o.a}</span>
-                {match.finished && (
-                  <span className={`${s.mpOtherPts} ${s[`mpPts${calcPoints({ h: o.h, a: o.a }, match.result)}`]}`}>
-                    {calcPoints({ h: o.h, a: o.a }, match.result)} Pkt
-                  </span>
-                )}
+                <span className={s.mpOtherTip}>
+                  <span className={s.mpTipH}>{o.h}</span>
+                  <span className={s.mpTipColon}>:</span>
+                  <span className={s.mpTipA}>{o.a}</span>
+                </span>
               </div>
             ))}
           </div>
