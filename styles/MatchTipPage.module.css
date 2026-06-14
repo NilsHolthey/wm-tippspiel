@@ -197,5 +197,5 @@
 .mpOtherPts { font-size: 0.75rem; color: var(--muted); min-width: 36px; text-align: right; }
 .mpPts3 { color: var(--green) !important; }
 .mpPts2 { color: var(--gold) !important; }
-.mpPts1 { color: var(--yellow) !important; }
+.mpPts1 { color: var(--orange) !important; }
 .mpPts0 { color: var(--muted) !important; }

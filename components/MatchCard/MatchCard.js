@@ -114,6 +114,13 @@ export default function MatchCard({ match, myTip, otherTips = [], tipStatus = nu
         </div>
       </div>
 
+      {!match.finished && !latePending && locked && hasTip && (
+        <div className={s.noChangeRow}>
+          <IconWarning size={11} style={{ verticalAlign: "middle", marginRight: 5 }} />
+          Deadline abgelaufen – keine Änderung mehr möglich
+        </div>
+      )}
+
       <div className={s.strip}>
         <div className={s.stripTip}>
           <span className={s.stripLbl}>Dein Tipp:</span>
@@ -152,13 +159,6 @@ export default function MatchCard({ match, myTip, otherTips = [], tipStatus = nu
         )}
       </div>
 
-      {!match.finished && !latePending && locked && hasTip && (
-        <div className={s.noChangeRow}>
-          <IconWarning size={11} style={{ verticalAlign: "middle", marginRight: 5 }} />
-          Deadline abgelaufen – keine Änderung mehr möglich
-        </div>
-      )}
-
       {!tipsVisible && tipStatus && (
         <div className={s.othersRow}>
           {tipStatus.map((u, i) => (
@@ -168,8 +168,7 @@ export default function MatchCard({ match, myTip, otherTips = [], tipStatus = nu
       )}
 
       {tipsVisible && othersWithPts.length > 0 && (
-        <div className={s.othersRow}>
-          <span className={s.othersLbl}>Alle:</span>
+        <div className={s.othersGrid}>
           {othersWithPts.map((o, i) => (
             <div key={i} className={s.otherChip}>
               <span className={s.otherName}>{o.name}</span>

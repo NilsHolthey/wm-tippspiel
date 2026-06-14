@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import Stepper from "./Stepper";
 import { IconWarning, IconCheck } from "../Icons";
+import { calcPoints } from "../../lib/scoring";
 import s from "./TipModal.module.css";
+
+const PTS_CLS = { 3: s.pts3, 2: s.pts2, 1: s.pts1, 0: s.pts0 };
 
 function pill(label, cls) {
   return <span style={{ fontSize:"0.62rem", letterSpacing:"0.07em", textTransform:"uppercase", borderRadius:"4px", padding:"2px 6px", background:"var(--d4)", color: cls === "day" ? "var(--gold)" : "var(--muted)" }}>{label}</span>;
@@ -50,6 +53,10 @@ export default function TipModal({ match, myTip, onClose, onSaved, onPrev, onNex
       setSaving(false);
     }
   }
+
+  const pts = match.finished && myTip
+    ? calcPoints({ h: myTip.h, a: myTip.a }, match.result)
+    : null;
 
   const kickoffDate = new Date(match.kickoff);
   const dateStr = kickoffDate.toLocaleDateString("de-DE", { weekday:"short", day:"2-digit", month:"2-digit" })
@@ -118,40 +125,57 @@ export default function TipModal({ match, myTip, onClose, onSaved, onPrev, onNex
           </div>
         </div>
 
-        {isLate && (
-          <div className={s.lateWarning}>
-            <IconWarning size={15} style={{ flexShrink: 0 }} />
-            Deadline abgelaufen — Admin muss diesen Tipp bestätigen
+        {myTip ? (
+          <div className={s.ownTipRow}>
+            <span className={s.ownTipLbl}>Dein Tipp</span>
+            <span className={s.ownTipScore}>{myTip.h} : {myTip.a}</span>
+            {pts != null && (
+              <span className={`${s.ownTipPts} ${PTS_CLS[pts] ?? ""}`}>{pts} Pkt</span>
+            )}
+            {myTip.lateStatus === "pending" && (
+              <span className={s.ownTipPending}>Wartet auf Freigabe</span>
+            )}
+          </div>
+        ) : (match.finished || isLate) && (
+          <div className={s.ownTipRow}>
+            <span className={s.ownTipNone}>Kein Tipp abgegeben</span>
           </div>
         )}
 
-        {!match.finished ? (
-          <div className={s.tipping}>
-            <div className={s.tippingLabel}>Dein Tipp</div>
-            <div className={s.steppersRow}>
-              <div className={s.stepperGroup}>
-                <span className={s.stepperTeamLbl}>{match.home}</span>
-                <Stepper value={h} onChange={setH} />
-              </div>
-              <span className={s.colon}>:</span>
-              <div className={s.stepperGroup}>
-                <span className={s.stepperTeamLbl}>{match.away}</span>
-                <Stepper value={a} onChange={setA} />
-              </div>
-            </div>
-
-            <button
-              className={`${s.submitBtn}${isLate ? " " + s.submitLate : ""}${done ? " " + s.submitDone : ""}`}
-              onClick={submit}
-              disabled={done || saving}
-            >
-              {done ? <><IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />Gespeichert!</> : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
-            </button>
-          </div>
+        {match.finished ? (
+          <div className={s.finishedNote}>Spiel beendet</div>
+        ) : isLate && myTip ? (
+          <div className={s.finishedNote}>Deadline abgelaufen – keine Änderung möglich</div>
         ) : (
-          <div className={s.finishedNote}>
-            Spiel beendet
-          </div>
+          <>
+            {isLate && (
+              <div className={s.lateWarning}>
+                <IconWarning size={15} style={{ flexShrink: 0 }} />
+                Deadline abgelaufen — Admin muss diesen Tipp bestätigen
+              </div>
+            )}
+            <div className={s.tipping}>
+              <div className={s.tippingLabel}>Dein Tipp</div>
+              <div className={s.steppersRow}>
+                <div className={s.stepperGroup}>
+                  <span className={s.stepperTeamLbl}>{match.home}</span>
+                  <Stepper value={h} onChange={setH} />
+                </div>
+                <span className={s.colon}>:</span>
+                <div className={s.stepperGroup}>
+                  <span className={s.stepperTeamLbl}>{match.away}</span>
+                  <Stepper value={a} onChange={setA} />
+                </div>
+              </div>
+              <button
+                className={`${s.submitBtn}${isLate ? " " + s.submitLate : ""}${done ? " " + s.submitDone : ""}`}
+                onClick={submit}
+                disabled={done || saving}
+              >
+                {done ? <><IconCheck size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />Gespeichert!</> : saving ? "Speichert…" : isLate ? "Anfrage senden" : myTip ? "Tipp aktualisieren" : "Tipp speichern"}
+              </button>
+            </div>
+          </>
         )}
 
       </div>
