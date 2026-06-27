@@ -76,6 +76,10 @@
 .mdNav { display: flex; gap: 5px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; }
 .mdNav::-webkit-scrollbar { display: none; }
 
+/* generic scrollbar-hide utility */
+.scrollHide { scrollbar-width: none; }
+.scrollHide::-webkit-scrollbar { display: none; }
+
 /* prev / next text nav */
 .mdDayNav {
   display: flex;
