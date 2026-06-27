@@ -56,6 +56,126 @@ function AdminResultRow({ match }) {
   );
 }
 
+const INPUT_STYLE = {
+  background: "var(--d4)", border: "1px solid var(--border)", borderRadius: 6,
+  color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem",
+  padding: "5px 8px", outline: "none", width: "100%",
+};
+
+const SELECT_STYLE = {
+  ...INPUT_STYLE,
+  cursor: "pointer",
+  appearance: "none",
+  WebkitAppearance: "none",
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+  backgroundRepeat: "no-repeat",
+  backgroundPosition: "right 8px center",
+  paddingRight: 28,
+};
+
+function parseOptions(placeholder, groupTeams, matchTeams) {
+  const mW = placeholder.match(/^W(\d+)$/);
+  if (mW) return matchTeams[parseInt(mW[1])] ?? [];
+
+  const m3 = placeholder.match(/^\d([A-Z](?:\/[A-Z])+)$/);
+  if (m3) return m3[1].split("/").flatMap(g => groupTeams[g] ?? []);
+
+  const m1 = placeholder.match(/^\d([A-Z])$/);
+  if (m1) return groupTeams[m1[1]] ?? [];
+
+  return null;
+}
+
+function AdminTeamRow({ match, groupTeams, matchTeams }) {
+  const [home,     setHome]     = useState(match.home);
+  const [homeFlag, setHomeFlag] = useState(match.homeFlag ?? "");
+  const [away,     setAway]     = useState(match.away);
+  const [awayFlag, setAwayFlag] = useState(match.awayFlag ?? "");
+  const [saving,   setSaving]   = useState(false);
+  const [saved,    setSaved]    = useState(false);
+
+  const homeOpts = isPlaceholder(match.home) ? parseOptions(match.home, groupTeams, matchTeams) : null;
+  const awayOpts = isPlaceholder(match.away) ? parseOptions(match.away, groupTeams, matchTeams) : null;
+
+  function pickHome(name) {
+    setHome(name);
+    const t = homeOpts?.find(o => o.name === name);
+    if (t?.flag) setHomeFlag(t.flag);
+    setSaved(false);
+  }
+
+  function pickAway(name) {
+    setAway(name);
+    const t = awayOpts?.find(o => o.name === name);
+    if (t?.flag) setAwayFlag(t.flag);
+    setSaved(false);
+  }
+
+  async function save() {
+    setSaving(true);
+    await fetch("/api/admin/teams", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matchId: match._id, home, homeFlag, away, awayFlag }),
+    });
+    setSaving(false);
+    setSaved(true);
+  }
+
+  const dirty = home !== match.home || homeFlag !== (match.homeFlag ?? "") ||
+                away !== match.away || awayFlag !== (match.awayFlag ?? "");
+
+  return (
+    <div className={a.arow} style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+      <div style={{ fontSize: "0.68rem", color: "var(--muted)" }}>
+        {formatDate(match.kickoff)} · Spiel #{match.num ?? "–"} · {match.phase}
+        {" · "}<span style={{ color: "var(--gold)", opacity: 0.65 }}>{match.home} – {match.away}</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 6, alignItems: "center" }}>
+        {homeOpts ? (
+          <select style={SELECT_STYLE} value={home} onChange={e => pickHome(e.target.value)}>
+            <option value={match.home}>{isPlaceholder(match.home) ? `– ${match.home}` : match.home}</option>
+            {homeOpts.map(t => <option key={t.name} value={t.name}>{t.flag} {t.name}</option>)}
+          </select>
+        ) : (
+          <div style={{ display: "flex", gap: 4 }}>
+            <input style={{ ...INPUT_STYLE, width: "2.4rem", flexShrink: 0, textAlign: "center", padding: "5px 4px" }}
+              value={homeFlag} onChange={e => { setHomeFlag(e.target.value); setSaved(false); }}
+              placeholder="🏳" maxLength={4}
+            />
+            <input style={INPUT_STYLE} value={home}
+              onChange={e => { setHome(e.target.value); setSaved(false); }} placeholder="Team Heim" />
+          </div>
+        )}
+        <span style={{ color: "var(--muted)", textAlign: "center", fontSize: "0.82rem", padding: "0 2px" }}>–</span>
+        {awayOpts ? (
+          <select style={SELECT_STYLE} value={away} onChange={e => pickAway(e.target.value)}>
+            <option value={match.away}>{isPlaceholder(match.away) ? `– ${match.away}` : match.away}</option>
+            {awayOpts.map(t => <option key={t.name} value={t.name}>{t.flag} {t.name}</option>)}
+          </select>
+        ) : (
+          <div style={{ display: "flex", gap: 4 }}>
+            <input style={INPUT_STYLE} value={away}
+              onChange={e => { setAway(e.target.value); setSaved(false); }} placeholder="Team Auswärts" />
+            <input style={{ ...INPUT_STYLE, width: "2.4rem", flexShrink: 0, textAlign: "center", padding: "5px 4px" }}
+              value={awayFlag} onChange={e => { setAwayFlag(e.target.value); setSaved(false); }}
+              placeholder="🏳" maxLength={4}
+            />
+          </div>
+        )}
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        {saved && !dirty
+          ? <span style={{ fontSize: "0.78rem", color: "var(--green)", display: "flex", alignItems: "center", gap: 4 }}><IconCheck size={12} />Gespeichert</span>
+          : <button className={a.arowSave} onClick={save} disabled={saving || !dirty}>
+              {saving ? "Speichert…" : "Speichern"}
+            </button>
+        }
+      </div>
+    </div>
+  );
+}
+
 function SyncSection() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -97,7 +217,11 @@ function SyncSection() {
   );
 }
 
-export default function AdminPage({ matches, lateRequestsInit }) {
+function isPlaceholder(name) {
+  return /^[0-9W]/.test(name) || name.includes("/");
+}
+
+export default function AdminPage({ matches, koMatches, groupTeams, matchTeams, lateRequestsInit }) {
   const [lateRequests, setLateRequests] = useState(lateRequestsInit);
   const [filterOpen, setFilterOpen] = useState(true);
 
@@ -187,6 +311,17 @@ export default function AdminPage({ matches, lateRequestsInit }) {
               ))
             )}
           </div>
+
+          {/* KO team name overrides */}
+          {koMatches.length > 0 && (
+            <div className={a.asec}>
+              <div className={a.asecTitle}>
+                KO-Runde · Teams eintragen
+                <span className={a.nbadge}>{koMatches.length}</span>
+              </div>
+              {koMatches.map(m => <AdminTeamRow key={m._id} match={m} groupTeams={groupTeams} matchTeams={matchTeams} />)}
+            </div>
+          )}
 
           {/* Sync — disabled: results don't arrive in time via openfootball */}
           {/* <div className={a.asec}>
@@ -278,6 +413,34 @@ export async function getServerSideProps(context) {
   await connectDB();
 
   const matches = await Match.find().sort({ kickoff: 1 }).lean();
+
+  function isPlaceholderSSR(name) {
+    return /^[0-9W]/.test(name) || name.includes("/");
+  }
+
+  // Build group → [{name, flag}] from group stage matches
+  const groupTeams = {};
+  for (const m of matches) {
+    if (m.phase !== "Gruppenphase" || !m.group) continue;
+    const g = m.group;
+    if (!groupTeams[g]) groupTeams[g] = [];
+    if (!groupTeams[g].find(t => t.name === m.home))
+      groupTeams[g].push({ name: m.home, flag: m.homeFlag ?? "" });
+    if (!groupTeams[g].find(t => t.name === m.away))
+      groupTeams[g].push({ name: m.away, flag: m.awayFlag ?? "" });
+  }
+
+  // Build fixtureId → [{name, flag}] for KO matches with real team names
+  const matchTeams = {};
+  for (const m of matches) {
+    if (!m.fixtureId || m.phase === "Gruppenphase") continue;
+    const teams = [
+      { name: m.home, flag: m.homeFlag ?? "" },
+      { name: m.away, flag: m.awayFlag ?? "" },
+    ].filter(t => !isPlaceholderSSR(t.name));
+    if (teams.length) matchTeams[m.fixtureId] = teams;
+  }
+
   const lateRequests = await LateRequest.find({ status: "pending" })
     .populate("user", "username")
     .populate("match")
@@ -291,6 +454,7 @@ export async function getServerSideProps(context) {
         matchday: m.matchday,
         kickoff: m.kickoff.toISOString(),
         group: m.group ?? null,
+        phase: m.phase ?? "Gruppenphase",
         home: m.home,
         homeFlag: m.homeFlag ?? "",
         away: m.away,
@@ -298,6 +462,21 @@ export async function getServerSideProps(context) {
         finished: m.finished,
         result: m.result ?? null,
       })),
+      koMatches: matches
+        .filter(m => m.phase !== "Gruppenphase" && (isPlaceholderSSR(m.home) || isPlaceholderSSR(m.away)))
+        .map(m => ({
+          _id: m._id.toString(),
+          num: m.fixtureId ?? null,
+          matchday: m.matchday,
+          phase: m.phase ?? "",
+          kickoff: m.kickoff.toISOString(),
+          home: m.home,
+          homeFlag: m.homeFlag ?? "",
+          away: m.away,
+          awayFlag: m.awayFlag ?? "",
+        })),
+      groupTeams,
+      matchTeams,
       lateRequestsInit: lateRequests.map(r => ({
         _id: r._id.toString(),
         user: { username: r.user.username },
