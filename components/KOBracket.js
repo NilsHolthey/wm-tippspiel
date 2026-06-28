@@ -17,6 +17,13 @@ const P3_DAY       = 22;
 const DAY_LABELS = { 18: "R32", 19: "Achtelfinale", 20: "Viertelfinale", 21: "Halbfinale", 23: "Finale" };
 const DAY_SHORT  = { 18: "R32", 19: "AF", 20: "VF", 21: "HF", 22: "P3", 23: "FIN" };
 
+// Fallback bracket order per matchday (fixtureIds top-to-bottom) when W-refs are gone.
+// Derived right-to-left from the actual bracket structure so every level is consistent.
+const BRACKET_ORDER = {
+  18: [74, 77, 73, 75, 83, 84, 81, 82, 76, 78, 79, 80, 86, 88, 85, 87],
+  19: [89, 90, 93, 94, 91, 92, 95, 96],
+};
+
 // Position helpers
 function cx(colIdx) { return PAD_X + colIdx * (CARD_W + COL_GAP); }
 function cy(colIdx, matchIdx) { return PAD_T + UNIT_H * Math.pow(2, colIdx) * (matchIdx + 0.5); }
@@ -129,9 +136,39 @@ export default function KOBracket({ matches, myTipsMap, onOpen }) {
     byDay[d].sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
   }
 
-  const columns = BRACKET_DAYS
+  const rawColumns = BRACKET_DAYS
     .filter(d => byDay[d]?.length)
-    .map((day, colIdx) => ({ day, colIdx, matches: byDay[day] }));
+    .map(day => ({ day, matches: byDay[day] }));
+
+  // Sort right-to-left: each column is ordered by its next column's W-references,
+  // which are themselves already correctly ordered. This ensures bracket connections
+  // are visually consistent at every level (R32→R16→QF→SF→Final).
+  for (let i = rawColumns.length - 2; i >= 0; i--) {
+    const { day, matches: colMatches } = rawColumns[i];
+    const nextMatches = rawColumns[i + 1].matches; // already sorted
+
+    const wOrder = [];
+    for (const nm of nextMatches) {
+      const h = nm.home?.match(/^W(\d+)$/);
+      const a = nm.away?.match(/^W(\d+)$/);
+      if (h) wOrder.push(parseInt(h[1]));
+      if (a) wOrder.push(parseInt(a[1]));
+    }
+
+    const order = wOrder.length ? wOrder : (BRACKET_ORDER[day] ?? []);
+    if (!order.length) continue;
+
+    rawColumns[i].matches = [...colMatches].sort((ma, mb) => {
+      const ai = order.indexOf(ma.fixtureId);
+      const bi = order.indexOf(mb.fixtureId);
+      if (ai === -1 && bi === -1) return (ma.fixtureId ?? 0) - (mb.fixtureId ?? 0);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+  }
+
+  const columns = rawColumns.map((col, colIdx) => ({ ...col, colIdx }));
 
   colsRef.current = columns;
 
