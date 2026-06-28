@@ -81,6 +81,7 @@ for (const m of matches) {
     home: home.name, homeFlag: home.flag,
     away: away.name, awayFlag: away.flag,
     kickoff, finished: false,
+    fixtureId: m.num ?? null,
   };
 
   if (m.score?.ft) {

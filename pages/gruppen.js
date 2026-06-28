@@ -273,6 +273,7 @@ export async function getStaticProps() {
     const koMatches = rawKO.map(m => ({
       _id: m._id.toString(),
       matchday: m.matchday,
+      fixtureId: m.fixtureId ?? null,
       home: m.home, homeFlag: m.homeFlag ?? "",
       away: m.away, awayFlag: m.awayFlag ?? "",
       kickoff: m.kickoff.toISOString(),

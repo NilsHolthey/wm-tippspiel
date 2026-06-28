@@ -9,7 +9,8 @@
     "lint": "eslint",
     "seed": "node --experimental-vm-modules scripts/seed.js",
     "seed-fixtures": "node --env-file=.env.local scripts/seed-fixtures.js",
-    "seed-users": "node --env-file=.env.local scripts/seed-users.js"
+    "seed-users": "node --env-file=.env.local scripts/seed-users.js",
+    "set-fixture-ids": "node --env-file=.env.local scripts/set-fixture-ids.js"
   },
   "engines": {
     "node": ">=24"
