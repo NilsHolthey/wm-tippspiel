@@ -35,6 +35,9 @@ export default async function handler(req, res) {
 
     const locked = isLocked(match.kickoff);
 
+    const username  = session.user.name;
+    const matchInfo = `${match.home} vs ${match.away}`;
+
     const existing = await Tip.findOne({ user: userId, match: matchId });
 
     if (locked) {
@@ -43,7 +46,7 @@ export default async function handler(req, res) {
       }
       const tip = await Tip.findOneAndUpdate(
         { user: userId, match: matchId },
-        { h, a, lateStatus: "pending", submittedAt: new Date() },
+        { h, a, lateStatus: "pending", submittedAt: new Date(), username, matchInfo },
         { upsert: true, new: true }
       );
       await LateRequest.findOneAndUpdate(
@@ -56,7 +59,7 @@ export default async function handler(req, res) {
 
     const tip = await Tip.findOneAndUpdate(
       { user: userId, match: matchId },
-      { h, a, lateStatus: null, submittedAt: new Date() },
+      { h, a, lateStatus: null, submittedAt: new Date(), username, matchInfo },
       { upsert: true, new: true }
     );
     return res.status(200).json({ tip });
