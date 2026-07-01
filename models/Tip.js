@@ -5,9 +5,10 @@ const TipSchema = new mongoose.Schema({
   match: { type: mongoose.Schema.Types.ObjectId, ref: "Match", required: true },
   h: { type: Number, required: true, min: 0 },
   a: { type: Number, required: true, min: 0 },
-  // null = normal, 'pending' = awaiting admin, 'approved' = late approved, 'rejected' = denied
   lateStatus: { type: String, enum: [null, "pending", "approved", "rejected"], default: null },
   submittedAt: { type: Date, default: Date.now },
+  username:  { type: String },
+  matchInfo: { type: String },
 }, { timestamps: true });
 
 TipSchema.index({ user: 1, match: 1 }, { unique: true });

@@ -155,7 +155,7 @@ export default function KOBracket({ matches, myTipsMap, onOpen }) {
       if (a) wOrder.push(parseInt(a[1]));
     }
 
-    const order = wOrder.length ? wOrder : (BRACKET_ORDER[day] ?? []);
+    const order = (wOrder.length === 2 * nextMatches.length) ? wOrder : (BRACKET_ORDER[day] ?? wOrder);
     if (!order.length) continue;
 
     rawColumns[i].matches = [...colMatches].sort((ma, mb) => {
